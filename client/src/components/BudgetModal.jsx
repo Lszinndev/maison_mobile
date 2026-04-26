@@ -47,11 +47,26 @@ export default function BudgetModal({ isOpen, onClose }) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
+      // Resetar para o Passo 1 e limpar o formulário ao fechar o modal
+      setStep(1);
+      setFormData({
+        ambiente: '',
+        largura: '',
+        altura: '',
+        mdf: '',
+        puxadores: '',
+        corredicas: false,
+        amortecedores: false,
+        acessorios: [],
+        nome: '',
+        email: ''
+      });
     }
     return () => {
       document.body.style.overflow = 'unset';
     };
   }, [isOpen]);
+
 
   if (!isOpen) return null;
 

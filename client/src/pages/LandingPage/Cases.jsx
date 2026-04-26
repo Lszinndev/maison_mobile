@@ -83,8 +83,22 @@ export default function Cases() {
   const [startX, setStartX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const sectionRef = useRef(null);
+  const [slideOffset, setSlideOffset] = useState(0);
+
+  useEffect(() => {
+    const updateOffset = () => {
+      const cardWidth = window.innerWidth >= 640 ? 450 : 280;
+      const gap = 32; // gap-8
+      setSlideOffset(currentIndex * (cardWidth + gap));
+    };
+
+    updateOffset();
+    window.addEventListener('resize', updateOffset);
+    return () => window.removeEventListener('resize', updateOffset);
+  }, [currentIndex]);
 
   const nextSlide = () => {
+
     setCurrentIndex((prev) => (prev + 1) % casesData.length);
   };
 
@@ -174,7 +188,8 @@ export default function Cases() {
 
         <div
           className="flex transition-transform duration-700 ease-out gap-8"
-          style={{ transform: `translateX(-${currentIndex * (100 / casesData.length)}%)` }}
+          style={{ transform: `translateX(-${slideOffset}px)` }}
+
         >
           {casesData.map((item, idx) => (
             <div
