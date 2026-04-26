@@ -1,0 +1,14 @@
+{
+  "name": "maison-mobile",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev:client": "bun run --cwd client dev",
+    "dev:server": "bun run --cwd server dev",
+    "dev": "bun run --workspaces --parallel dev"
+  }
+
+}
