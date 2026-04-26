@@ -4,9 +4,12 @@
   --font-sans: 'Inter', system-ui, sans-serif;
 }
 
-html {
+html, body {
   scroll-behavior: smooth;
+  background-color: #000000;
+  color: #ffffff;
 }
+
 
 
 /* Custom Premium Animations */

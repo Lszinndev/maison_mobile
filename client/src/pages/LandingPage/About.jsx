@@ -1,9 +1,21 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { motion } from 'motion/react';
+
+
+// Importando novas imagens enviadas pelo usuário
+import img1 from '../../assets/img 1.webp';
+import img2 from '../../assets/img 2.webp';
+import img3 from '../../assets/img 3.webp';
+import img5 from '../../assets/img 5.webp';
+import img6 from '../../assets/img 6.webp';
+
+const aboutImages = [img1, img2, img3, img5, img6];
 
 const pillars = [
   {
     title: 'Design Autoral',
     desc: 'Projetos desenhados do zero para refletir a personalidade única de cada cliente.',
+
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -33,6 +45,7 @@ const pillars = [
 export default function About() {
   const [isVisible, setIsVisible] = useState(false);
   const [hoveredPillar, setHoveredPillar] = useState(null);
+  const [currentImageIdx, setCurrentImageIdx] = useState(0);
   const sectionRef = useRef(null);
 
   useEffect(() => {
@@ -40,12 +53,21 @@ export default function About() {
       ([entry]) => {
         setIsVisible(entry.isIntersecting);
       },
-
       { threshold: 0.2 }
     );
     if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => observer.disconnect();
+
+    // Intervalo para alternar as imagens do Sobre Nós
+    const imageInterval = setInterval(() => {
+      setCurrentImageIdx((prev) => (prev + 1) % aboutImages.length);
+    }, 4000);
+
+    return () => {
+      observer.disconnect();
+      clearInterval(imageInterval);
+    };
   }, []);
+
 
   return (
     <div 
@@ -98,22 +120,53 @@ export default function About() {
         </div>
       </div>
 
-      {/* Right Column: Image with Hover Effect */}
-      <div className="flex-1 relative min-h-[400px] md:min-h-screen overflow-hidden group">
-        <div className="absolute inset-0 bg-neutral-950/20 group-hover:bg-neutral-950/0 transition-all duration-500 z-10"></div>
-        <img 
-          src="https://images.unsplash.com/photo-1618219959362-223a8fae76b0?q=80&w=1920" 
-          alt="Modern living room with wood paneling" 
-          className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105 md:rounded-tl-[80px]"
-        />
-        {/* Subtle overlay text appearing on hover (desktop only) */}
-        <div className="absolute bottom-12 left-12 right-12 z-20 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0 hidden md:block">
-          <div className="bg-neutral-950/80 backdrop-blur-md p-6 rounded-2xl border border-white/10">
-            <p className="text-[#F7D634] text-xs font-bold tracking-[0.2em] uppercase mb-1">Padrão Maison</p>
-            <p className="text-white text-sm font-light">Ambientes planejados para durar uma vida inteira.</p>
+      {/* Right Column: Netflix-style Diagonal Photo Marquee */}
+      <div className="flex-1 relative min-h-[500px] md:min-h-screen overflow-hidden bg-neutral-950">
+        <div className="absolute inset-0 bg-gradient-to-r from-neutral-900 via-transparent to-neutral-950/80 z-10 pointer-events-none" />
+        
+        {/* Tilted Container wrapper */}
+        <div 
+          className="absolute -inset-x-20 -inset-y-40 transform -rotate-12 flex justify-center gap-6"
+        >
+          {/* Coluna 1: Sobe */}
+          <div className="overflow-hidden h-full flex flex-col justify-center">
+            <motion.div 
+              animate={{ y: ["0%", "-50%"] }}
+              transition={{ ease: "linear", duration: 30, repeat: Infinity }}
+              className="flex flex-col gap-6"
+            >
+              {[...aboutImages, ...aboutImages].map((img, idx) => (
+                <img 
+                  key={`c1-${idx}`} 
+                  src={img} 
+                  alt="Ambiente Maison" 
+                  className="w-40 md:w-56 h-56 md:h-72 object-cover rounded-3xl shadow-2xl border border-white/5 opacity-50 hover:opacity-100 hover:scale-105 transition-all duration-300 pointer-events-auto cursor-pointer" 
+                />
+              ))}
+            </motion.div>
+          </div>
+
+          {/* Coluna 2: Desce */}
+          <div className="overflow-hidden h-full flex flex-col justify-center">
+            <motion.div 
+              animate={{ y: ["-50%", "0%"] }}
+              transition={{ ease: "linear", duration: 35, repeat: Infinity }}
+              className="flex flex-col gap-6"
+            >
+              {[...aboutImages, ...aboutImages].map((img, idx) => (
+                <img 
+                  key={`c2-${idx}`} 
+                  src={img} 
+                  alt="Ambiente Maison" 
+                  className="w-40 md:w-56 h-56 md:h-72 object-cover rounded-3xl shadow-2xl border border-white/5 opacity-50 hover:opacity-100 hover:scale-105 transition-all duration-300 pointer-events-auto cursor-pointer" 
+                />
+              ))}
+            </motion.div>
           </div>
         </div>
       </div>
+
+
     </div>
   );
 }

@@ -96,7 +96,7 @@ export default function Cases() {
   useEffect(() => {
     const timer = setInterval(() => {
       nextSlide();
-    }, 5000); // Avança a cada 5 segundos
+    }, 2000); // Avança a cada 5 segundos
     return () => clearInterval(timer);
   }, [currentIndex]);
 
@@ -141,12 +141,12 @@ export default function Cases() {
 
 
   return (
-    <div 
-      id="cases" 
+    <div
+      id="cases"
       ref={sectionRef}
       className="bg-neutral-950 text-white py-24 px-6 md:px-16 font-sans relative overflow-hidden border-t border-white/5"
     >
-      
+
       {/* Header Section */}
       <div className="max-w-7xl mx-auto mb-16 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
         <div className={`transition-all duration-1000 transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
@@ -163,7 +163,7 @@ export default function Cases() {
       </div>
 
       {/* Carousel Container */}
-      <div 
+      <div
         className="relative max-w-7xl mx-auto overflow-hidden py-4 cursor-grab active:cursor-grabbing"
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
@@ -172,34 +172,33 @@ export default function Cases() {
         onTouchEnd={handleTouchEnd}
       >
 
-        <div 
+        <div
           className="flex transition-transform duration-700 ease-out gap-8"
           style={{ transform: `translateX(-${currentIndex * (100 / casesData.length)}%)` }}
         >
           {casesData.map((item, idx) => (
-            <div 
-              key={item.id} 
-              className={`w-[280px] sm:w-[450px] flex-shrink-0 rounded-[40px] overflow-hidden relative group shadow-2xl cursor-pointer transition-all duration-1000 transform ${
-                isVisible 
-                  ? 'opacity-100 translate-y-0 scale-100' 
+            <div
+              key={item.id}
+              className={`w-[280px] sm:w-[450px] flex-shrink-0 rounded-[40px] overflow-hidden relative group shadow-2xl cursor-pointer transition-all duration-1000 transform ${isVisible
+                  ? 'opacity-100 translate-y-0 scale-100'
                   : 'opacity-0 translate-y-16 scale-95'
-              }`}
+                }`}
               style={{ transitionDelay: `${idx * 200}ms` }}
               onClick={() => setSelectedImage(item.image)}
             >
 
               {/* Image with zoom effect on hover */}
               <div className="aspect-[4/3] overflow-hidden">
-                <img 
-                  src={item.image} 
-                  alt={item.title} 
+                <img
+                  src={item.image}
+                  alt={item.title}
                   className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-110"
                 />
               </div>
 
               {/* Minimalist Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity duration-300"></div>
-              
+
               {/* Card Content */}
               <div className="absolute bottom-8 left-8 right-8 z-10 flex items-end justify-between">
                 <div>
@@ -224,7 +223,7 @@ export default function Cases() {
 
       {/* Minimal Controls */}
       <div className="flex justify-center mt-12 gap-6">
-        <button 
+        <button
           onClick={prevSlide}
           className="w-12 h-12 rounded-full border border-white/10 hover:border-white/30 bg-neutral-900 text-white hover:text-[#F7D634] flex items-center justify-center transition-all duration-300 shadow-md"
         >
@@ -235,17 +234,16 @@ export default function Cases() {
 
         <div className="flex items-center gap-3 bg-neutral-900 border border-white/5 px-6 py-3 rounded-full">
           {casesData.map((_, idx) => (
-            <button 
+            <button
               key={idx}
               onClick={() => setCurrentIndex(idx)}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                idx === currentIndex ? 'bg-[#F7D634] w-8' : 'bg-white/20 w-2 hover:bg-white/40'
-              }`}
+              className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentIndex ? 'bg-[#F7D634] w-8' : 'bg-white/20 w-2 hover:bg-white/40'
+                }`}
             />
           ))}
         </div>
 
-        <button 
+        <button
           onClick={nextSlide}
           className="w-12 h-12 rounded-full border border-white/10 hover:border-white/30 bg-neutral-900 text-white hover:text-[#F7D634] flex items-center justify-center transition-all duration-300 shadow-md"
         >
@@ -257,7 +255,7 @@ export default function Cases() {
 
       {/* Lightbox Modal (Fullscreen Image Viewer) */}
       {selectedImage && (
-        <div 
+        <div
           className="fixed inset-0 z-50 bg-neutral-950/95 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer"
           onClick={() => setSelectedImage(null)}
         >
@@ -266,9 +264,9 @@ export default function Cases() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-          <img 
-            src={selectedImage} 
-            alt="Projeto ampliado" 
+          <img
+            src={selectedImage}
+            alt="Projeto ampliado"
             className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl animate-fade-in"
           />
         </div>

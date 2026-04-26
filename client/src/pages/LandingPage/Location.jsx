@@ -89,7 +89,8 @@ export default function Location() {
         <iframe 
           title="Google Maps"
           src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3598.118949826359!2d-49.31750272459461!3d-25.467713277535874!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94dce30fd71e98eb%3A0xc6cb52c416f5c5b9!2sR.%20Jo%C3%A3o%20Bettega%2C%204265%20-%20Port%C3%A3o%2C%20Curitiba%20-%20PR%2C%2081350-274!5e0!3m2!1spt-BR!2sbr!4v1714088921800!5m2!1spt-BR!2sbr" 
-          className="absolute inset-0 w-full h-full border-0 md:rounded-tl-[80px] transition-all duration-500 hover:brightness-105"
+          className="absolute inset-0 w-full h-full border-0 md:rounded-tl-[40px] transition-all duration-500 hover:brightness-105"
+
           allowFullScreen="" 
           loading="lazy" 
           referrerPolicy="no-referrer-when-downgrade"

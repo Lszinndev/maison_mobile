@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import logoImg from '../../assets/logo.webp';
 import heroBg from '../../assets/hero-bg.webp';
+import BudgetModal from '../../components/BudgetModal';
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState('inicio');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
 
   useEffect(() => {
     const sections = ['inicio', 'sobre', 'cases', 'mapa'];
@@ -103,11 +106,14 @@ export default function Home() {
         </nav>
 
         {/* CTA Top Right */}
-        <button className="hidden md:block px-6 py-2 bg-[#F7D634] hover:bg-[#e5c323] text-neutral-950 text-xs font-semibold tracking-[0.15em] uppercase rounded-full transition-all duration-300 shadow-md">
-
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="hidden md:block px-6 py-2 bg-[#F7D634] hover:bg-[#e5c323] text-neutral-950 text-xs font-semibold tracking-[0.15em] uppercase rounded-full transition-all duration-300 shadow-md"
+        >
           Orçamento
         </button>
       </header>
+
 
 
       {/* Hero Content */}
@@ -129,8 +135,10 @@ export default function Home() {
 
         <div className="flex flex-col sm:flex-row gap-4 opacity-0 animate-fade-up delay-700">
 
-          <button className="px-10 py-4 bg-white hover:bg-neutral-200 text-neutral-950 text-xs font-semibold tracking-[0.2em] uppercase rounded-full shadow-2xl transition-all duration-300 transform hover:-translate-y-0.5">
-
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="px-10 py-4 bg-white hover:bg-neutral-200 text-neutral-950 text-xs font-semibold tracking-[0.2em] uppercase rounded-full shadow-2xl transition-all duration-300 transform hover:-translate-y-0.5"
+          >
             Solicitar Orçamento
           </button>
           <a href="#cases" className="px-10 py-4 bg-white/5 hover:bg-white/15 text-white text-xs font-semibold tracking-[0.2em] uppercase rounded-full border border-white/10 backdrop-blur-md shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 inline-flex items-center justify-center">
@@ -151,6 +159,9 @@ export default function Home() {
           <path d="M12.031 6c-3.313 0-6 2.691-6 6.005 0 1.332.434 2.562 1.171 3.565l-.771 2.825 2.894-.759c.961.59 2.091.941 3.3.941 3.313 0 6-2.691 6-6.005 0-3.313-2.687-6.005-6-6.005zm0 1.5c2.481 0 4.5 2.015 4.5 4.505 0 2.489-2.019 4.505-4.5 4.505-.989 0-1.905-.319-2.656-.865l-.174-.128-1.595.418.424-1.556-.142-.206a4.469 4.469 0 01-.857-2.668c0-2.49 2.019-4.505 4.5-4.505z"/>
         </svg>
       </a>
+      {/* Budget Multi-step Modal */}
+      <BudgetModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   );
 }
+
