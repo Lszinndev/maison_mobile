@@ -3,13 +3,14 @@ import { motion } from 'motion/react';
 
 
 // Importando novas imagens enviadas pelo usuário
-import img1 from '../../assets/img 1.webp';
-import img2 from '../../assets/img 2.webp';
-import img3 from '../../assets/img 3.webp';
-import img5 from '../../assets/img 5.webp';
-import img6 from '../../assets/img 6.webp';
+import img1 from '../../assets/467649034_18249279868278373_8794566806174627970_n.webp';
+import img2 from '../../assets/467813599_18249278521278373_8460995950932977382_n.webp';
+import img3 from '../../assets/467910507_18249415078278373_2893813455782362975_n.webp';
+import img5 from '../../assets/480756493_18259899361278373_8959267299341955590_n.webp';
+import img6 from '../../assets/650403770_18026582123801778_8987649032858513809_n.webp';
 
 const aboutImages = [img1, img2, img3, img5, img6];
+
 
 const pillars = [
   {
@@ -70,8 +71,8 @@ export default function About() {
 
 
   return (
-    <div 
-      id="sobre" 
+    <div
+      id="sobre"
       ref={sectionRef}
       className="bg-neutral-900 text-white flex flex-col md:flex-row min-h-screen font-sans overflow-hidden relative"
     >
@@ -80,11 +81,11 @@ export default function About() {
         <span className={`text-[#F7D634] text-xs md:text-sm font-semibold tracking-[0.3em] uppercase mb-4 transition-all duration-1000 transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
           Nossa Essência
         </span>
-        
+
         <h2 className={`text-4xl md:text-6xl font-light mb-8 tracking-tight transition-all duration-1000 delay-100 transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           A união entre <span className="font-semibold">arte</span> e <span className="font-semibold">precisão</span>.
         </h2>
-        
+
         <p className={`text-slate-300 text-base md:text-lg leading-relaxed font-light mb-12 max-w-xl transition-all duration-1000 delay-300 transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           Na Maison Mobile, cada projeto é tratado como uma obra única. Não produzimos apenas móveis; materializamos ambientes que contam histórias e acolhem momentos.
         </p>
@@ -92,15 +93,14 @@ export default function About() {
         {/* Interactive Pillars */}
         <div className={`grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12 transition-all duration-1000 delay-500 transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           {pillars.map((pillar, idx) => (
-            <div 
+            <div
               key={idx}
               onMouseEnter={() => setHoveredPillar(idx)}
               onMouseLeave={() => setHoveredPillar(null)}
-              className={`p-6 rounded-2xl border transition-all duration-300 cursor-pointer ${
-                hoveredPillar === idx 
-                  ? 'bg-[#F7D634] border-[#F7D634] text-neutral-950 scale-105 shadow-xl shadow-[#F7D634]/10' 
-                  : 'bg-neutral-800/50 border-neutral-700/50 text-white hover:border-neutral-600'
-              }`}
+              className={`p-6 rounded-2xl border transition-all duration-300 cursor-pointer ${hoveredPillar === idx
+                ? 'bg-[#F7D634] border-[#F7D634] text-neutral-950 scale-105 shadow-xl shadow-[#F7D634]/10'
+                : 'bg-neutral-800/50 border-neutral-700/50 text-white hover:border-neutral-600'
+                }`}
             >
               <div className={`mb-4 transition-colors duration-300 ${hoveredPillar === idx ? 'text-neutral-950' : 'text-[#F7D634]'}`}>
                 {pillar.icon}
@@ -123,24 +123,24 @@ export default function About() {
       {/* Right Column: Netflix-style Diagonal Photo Marquee */}
       <div className="flex-1 relative min-h-[500px] md:min-h-screen overflow-hidden bg-neutral-950">
         <div className="absolute inset-0 bg-gradient-to-r from-neutral-900 via-transparent to-neutral-950/80 z-10 pointer-events-none" />
-        
+
         {/* Tilted Container wrapper */}
-        <div 
+        <div
           className="absolute -inset-x-20 -inset-y-40 transform -rotate-12 flex justify-center gap-6"
         >
           {/* Coluna 1: Sobe */}
           <div className="overflow-hidden h-full flex flex-col justify-center">
-            <motion.div 
+            <motion.div
               animate={{ y: ["0%", "-50%"] }}
-              transition={{ ease: "linear", duration: 30, repeat: Infinity }}
+              transition={{ ease: "linear", duration: 90, repeat: Infinity }}
               className="flex flex-col gap-6"
             >
-              {[...aboutImages, ...aboutImages].map((img, idx) => (
-                <img 
-                  key={`c1-${idx}`} 
-                  src={img} 
-                  alt="Ambiente Maison" 
-                  className="w-40 md:w-56 h-56 md:h-72 object-cover rounded-3xl shadow-2xl border border-white/5 opacity-50 hover:opacity-100 hover:scale-105 transition-all duration-300 pointer-events-auto cursor-pointer" 
+              {[...aboutImages, ...aboutImages, ...aboutImages, ...aboutImages].map((img, idx) => (
+                <img
+                  key={`c1-${idx}`}
+                  src={img}
+                  alt="Ambiente Maison"
+                  className="w-40 md:w-56 h-56 md:h-72 object-cover rounded-3xl shadow-2xl border border-white/5 opacity-50 hover:opacity-100 hover:scale-105 transition-all duration-300 pointer-events-auto cursor-pointer"
                 />
               ))}
             </motion.div>
@@ -148,21 +148,23 @@ export default function About() {
 
           {/* Coluna 2: Desce */}
           <div className="overflow-hidden h-full flex flex-col justify-center">
-            <motion.div 
+            <motion.div
               animate={{ y: ["-50%", "0%"] }}
-              transition={{ ease: "linear", duration: 35, repeat: Infinity }}
+              transition={{ ease: "linear", duration: 50, repeat: Infinity }}
               className="flex flex-col gap-6"
             >
-              {[...aboutImages, ...aboutImages].map((img, idx) => (
-                <img 
-                  key={`c2-${idx}`} 
-                  src={img} 
-                  alt="Ambiente Maison" 
-                  className="w-40 md:w-56 h-56 md:h-72 object-cover rounded-3xl shadow-2xl border border-white/5 opacity-50 hover:opacity-100 hover:scale-105 transition-all duration-300 pointer-events-auto cursor-pointer" 
+              {[...aboutImages, ...aboutImages, ...aboutImages, ...aboutImages].reverse().map((img, idx) => (
+
+                <img
+                  key={`c2-${idx}`}
+                  src={img}
+                  alt="Ambiente Maison"
+                  className="w-40 md:w-56 h-56 md:h-72 object-cover rounded-3xl shadow-2xl border border-white/5 opacity-50 hover:opacity-100 hover:scale-105 transition-all duration-300 pointer-events-auto cursor-pointer"
                 />
               ))}
             </motion.div>
           </div>
+
         </div>
       </div>
 
