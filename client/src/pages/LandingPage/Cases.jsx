@@ -3,10 +3,10 @@ import React, { useState, useEffect, useRef } from 'react';
 // Importando imagens reais enviadas pelo usuário
 import case1 from '../../assets/467670809_18249282280278373_4023181893267405786_n.webp';
 import case2 from '../../assets/467689236_18249278812278373_7647212320046117727_n.webp';
-import case3 from '../../assets/467725659_18249414688278373_1527287407004460594_n.webp';
+import case3 from '../../assets/quarto.webp';
 import case4 from '../../assets/467841028_18249415105278373_4763349829176822746_n.webp';
 import case5 from '../../assets/467864355_18249414826278373_5527320839520781744_n.webp';
-import case6 from '../../assets/468038973_18249415072278373_6804399670591516843_n.webp';
+import case6 from '../../assets/banheiro.webp';
 import case7 from '../../assets/471202049_18252952471278373_1634508468807559955_n.webp';
 import case8 from '../../assets/480536699_18259901926278373_5745179231296716394_n.webp';
 import case9 from '../../assets/642651086_18003317867854648_7403028152810960060_n.webp';
