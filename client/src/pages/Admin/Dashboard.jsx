@@ -108,7 +108,12 @@ export default function Dashboard() {
       }`}>
         <img src={logoImg} alt="M" className="h-5 w-auto" />
         <nav className="flex flex-col gap-8">
-          <SidebarIcon icon={<UserGroupIcon size={22}/>} active isDarkMode={isDarkMode} />
+          <SidebarIcon 
+            icon={<UserGroupIcon size={22}/>} 
+            active 
+            isDarkMode={isDarkMode} 
+            badge={leads.filter(l => l.status === 'Novo').length}
+          />
         </nav>
 
         <div className="mt-auto flex flex-col items-center gap-6">
@@ -222,7 +227,7 @@ export default function Dashboard() {
               <div className="flex justify-between items-center">
                 <span className="text-[12px] text-zinc-500 truncate max-w-[160px]">{lead.email}</span>
                 <div className={`w-1.5 h-1.5 rounded-full ${
-                  lead.status === 'Novo' ? 'bg-[#0A84FF]' : 
+                  lead.status === 'Novo' ? 'bg-[#0A84FF] animate-pulse ring-4 ring-[#0A84FF]/20' : 
                   lead.status === 'Atendimento' ? 'bg-[#FF9F0A]' : 
                   lead.status === 'Pendente' ? 'bg-[#FF3B30]' : 
                   'bg-[#30D158]'
@@ -370,14 +375,19 @@ function FilterPill({ label, active, onClick, isDarkMode, color }) {
   );
 }
 
-function SidebarIcon({ icon, active = false, isDarkMode = true }) {
+function SidebarIcon({ icon, active = false, isDarkMode = true, badge = 0 }) {
   return (
-    <div className={`p-3 rounded-2xl transition-all cursor-pointer ${
+    <div className={`p-3 rounded-2xl transition-all cursor-pointer relative ${
       active 
         ? 'bg-[#F7D634] text-black' 
         : (isDarkMode ? 'text-zinc-700 hover:text-white hover:bg-white/5' : 'text-neutral-300 hover:text-black hover:bg-black/5')
     }`}>
       {icon}
+      {badge > 0 && (
+        <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#FF3B30] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-inherit shadow-lg">
+          {badge}
+        </span>
+      )}
     </div>
   );
 }
