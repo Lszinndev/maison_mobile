@@ -190,7 +190,7 @@ export default function Dashboard() {
                             status === 'Todos' ? (isDarkMode ? 'bg-white/20' : 'bg-black/10') :
                             status === 'Novo' ? 'bg-[#0A84FF]' :
                             status === 'Atendimento' ? 'bg-[#FF9F0A]' :
-                            status === 'Pendente' ? 'bg-[#5856D6]' :
+                            status === 'Pendente' ? 'bg-[#FF3B30]' :
                             'bg-[#30D158]'
                           }`} />
                           {status}
@@ -224,7 +224,7 @@ export default function Dashboard() {
                 <div className={`w-1.5 h-1.5 rounded-full ${
                   lead.status === 'Novo' ? 'bg-[#0A84FF]' : 
                   lead.status === 'Atendimento' ? 'bg-[#FF9F0A]' : 
-                  lead.status === 'Pendente' ? 'bg-[#5856D6]' : 
+                  lead.status === 'Pendente' ? 'bg-[#FF3B30]' : 
                   'bg-[#30D158]'
                 }`} />
               </div>
@@ -337,7 +337,7 @@ export default function Dashboard() {
                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                    <StatusButton label="Novo Lead" active={selectedLead.status === 'Novo'} onClick={() => handleStatusChange(selectedLead.id, 'Novo')} color="#0A84FF" isDarkMode={isDarkMode} />
                    <StatusButton label="Em Atendimento" active={selectedLead.status === 'Atendimento'} onClick={() => handleStatusChange(selectedLead.id, 'Atendimento')} color="#FF9F0A" isDarkMode={isDarkMode} />
-                   <StatusButton label="Pendente" active={selectedLead.status === 'Pendente'} onClick={() => handleStatusChange(selectedLead.id, 'Pendente')} color="#5856D6" isDarkMode={isDarkMode} />
+                   <StatusButton label="Pendente" active={selectedLead.status === 'Pendente'} onClick={() => handleStatusChange(selectedLead.id, 'Pendente')} color="#FF3B30" isDarkMode={isDarkMode} />
                    <StatusButton label="Finalizado" active={selectedLead.status === 'Finalizado'} icon={<Tick01Icon size={18}/>} onClick={() => handleStatusChange(selectedLead.id, 'Finalizado')} color="#30D158" isDarkMode={isDarkMode} />
                  </div>
               </section>
@@ -386,7 +386,7 @@ function AppleBadge({ status }) {
   const styles = {
     'Novo': 'bg-[#0A84FF]/20 text-[#0A84FF]',
     'Atendimento': 'bg-[#FF9F0A]/20 text-[#FF9F0A]',
-    'Pendente': 'bg-[#5856D6]/20 text-[#5856D6]',
+    'Pendente': 'bg-[#FF3B30]/20 text-[#FF3B30]',
     'Finalizado': 'bg-[#30D158]/20 text-[#30D158]'
   };
   return (
