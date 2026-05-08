@@ -33,6 +33,8 @@ export default function Dashboard() {
   const [statusFilter, setStatusFilter] = useState('Todos');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isProposalModalOpen, setIsProposalModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedLead, setEditedLead] = useState(null);
   const leadsPerPage = 8;
 
   // Resetar para a primeira página ao buscar ou filtrar
@@ -83,6 +85,42 @@ export default function Dashboard() {
     if (selectedLead?.id === id) setSelectedLead({ ...selectedLead, status: newStatus });
   };
 
+  const handleStartEdit = () => {
+    setEditedLead({ ...selectedLead });
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditedLead(null);
+  };
+
+  const handleSaveEdit = () => {
+    const updatedLeads = leads.map(l => l.id === editedLead.id ? editedLead : l);
+    setLeads(updatedLeads);
+    setSelectedLead(editedLead);
+    setIsEditing(false);
+    setEditedLead(null);
+    
+    // Salvar no LocalStorage (opcional se quiser persistência imediata)
+    const storedLeads = JSON.parse(localStorage.getItem('leads') || '[]');
+    const newStoredLeads = storedLeads.map(l => l.id === editedLead.id ? editedLead : l);
+    // Se o lead editado for um mock, ele pode não estar no localStorage. 
+    // Para simplificar esse MVP, apenas atualizamos o estado local.
+    localStorage.setItem('leads', JSON.stringify(newStoredLeads));
+  };
+
+  const handleEditChange = (field, value, isBudgetField = false) => {
+    if (isBudgetField) {
+      setEditedLead(prev => ({
+        ...prev,
+        budget: { ...prev.budget, [field]: value }
+      }));
+    } else {
+      setEditedLead(prev => ({ ...prev, [field]: value }));
+    }
+  };
+
   const filteredLeads = leads.filter(l => {
     const matchesSearch = l.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'Todos' || l.status === statusFilter;
@@ -123,9 +161,6 @@ export default function Dashboard() {
         <header className="p-6 space-y-6">
           <div className="flex justify-between items-center">
             <h1 className="text-xl font-bold tracking-tight">Leads</h1>
-            <button className="w-8 h-8 rounded-full bg-[#F7D634] text-black flex items-center justify-center hover:scale-110 transition-all">
-              <Add01Icon size={18} />
-            </button>
           </div>
           <div className="flex gap-2 items-center">
             <div className="relative group flex-1">
@@ -194,7 +229,10 @@ export default function Dashboard() {
           {currentLeads.map((lead) => (
             <div 
               key={lead.id} 
-              onClick={() => setSelectedLead(lead)}
+              onClick={() => {
+                setSelectedLead(lead);
+                setIsEditing(false);
+              }}
               className={`p-4 rounded-2xl cursor-pointer transition-all duration-300 relative ${
                 selectedLead?.id === lead.id 
                   ? 'bg-white ring-1 ring-black/5 z-10'
@@ -260,28 +298,90 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="flex gap-3">
-                <button className="px-6 py-2.5 text-[13px] font-bold rounded-xl border transition-all bg-white text-black border-neutral-200 hover:bg-neutral-50">Editar</button>
-                <button 
-                  onClick={() => setIsProposalModalOpen(true)}
-                  className="px-6 py-2.5 text-[13px] font-bold rounded-xl transition-all bg-black text-white hover:bg-neutral-800"
-                >
-                  Gerar Proposta
-                </button>
+                {isEditing ? (
+                  <>
+                    <button 
+                      onClick={handleCancelEdit}
+                      className="px-6 py-2.5 text-[13px] font-bold rounded-xl border transition-all bg-white text-black border-neutral-200 hover:bg-neutral-50"
+                    >
+                      Cancelar
+                    </button>
+                    <button 
+                      onClick={handleSaveEdit}
+                      className="px-6 py-2.5 text-[13px] font-bold rounded-xl transition-all bg-black text-white hover:bg-neutral-800"
+                    >
+                      Salvar Alterações
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button 
+                      onClick={handleStartEdit}
+                      className="px-6 py-2.5 text-[13px] font-bold rounded-xl border transition-all bg-white text-black border-neutral-200 hover:bg-neutral-50"
+                    >
+                      Editar
+                    </button>
+                    <button 
+                      onClick={() => setIsProposalModalOpen(true)}
+                      className="px-6 py-2.5 text-[13px] font-bold rounded-xl transition-all bg-black text-white hover:bg-neutral-800"
+                    >
+                      Gerar Proposta
+                    </button>
+                  </>
+                )}
               </div>
             </header>
 
             {/* Body */}
             <div className="flex-1 overflow-y-auto p-12 lg:p-16 space-y-16 scrollbar-hide">
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-12 gap-x-8">
-                <DetailBox label="Ambiente" value={selectedLead.budget.ambiente} />
-                <DetailBox label="Acabamento" value={selectedLead.budget.mdf} />
-                <DetailBox label="Estilo" value={selectedLead.budget.estilo} />
-                <DetailBox label="Recebido" value={selectedLead.date} />
+                <DetailBox 
+                  label="Ambiente" 
+                  value={isEditing ? editedLead.budget.ambiente : selectedLead.budget.ambiente} 
+                  isEditing={isEditing}
+                  onChange={(val) => handleEditChange('ambiente', val, true)}
+                />
+                <DetailBox 
+                  label="Acabamento" 
+                  value={isEditing ? editedLead.budget.mdf : selectedLead.budget.mdf} 
+                  isEditing={isEditing}
+                  onChange={(val) => handleEditChange('mdf', val, true)}
+                />
+                <DetailBox 
+                  label="Estilo" 
+                  value={isEditing ? editedLead.budget.estilo : selectedLead.budget.estilo} 
+                  isEditing={isEditing}
+                  onChange={(val) => handleEditChange('estilo', val, true)}
+                />
+                <DetailBox 
+                  label="Recebido" 
+                  value={selectedLead.date} 
+                />
                 
-                <DetailBox label="Ferragens" value={selectedLead.budget.ferragens || selectedLead.budget.marcaFerragem || 'N/A'} />
-                <DetailBox label="Puxadores" value={selectedLead.budget.puxadores || 'N/A'} />
-                <DetailBox label="Medidas" value={selectedLead.budget.medidas || (selectedLead.budget.largura ? `${selectedLead.budget.largura}m x ${selectedLead.budget.altura}m` : 'N/A')} />
-                <DetailBox label="WhatsApp" value={selectedLead.budget.whatsapp || selectedLead.budget.telefone || 'N/A'} />
+                <DetailBox 
+                  label="Ferragens" 
+                  value={isEditing ? (editedLead.budget.ferragens || '') : (selectedLead.budget.ferragens || 'N/A')} 
+                  isEditing={isEditing}
+                  onChange={(val) => handleEditChange('ferragens', val, true)}
+                />
+                <DetailBox 
+                  label="Puxadores" 
+                  value={isEditing ? (editedLead.budget.puxadores || '') : (selectedLead.budget.puxadores || 'N/A')} 
+                  isEditing={isEditing}
+                  onChange={(val) => handleEditChange('puxadores', val, true)}
+                />
+                <DetailBox 
+                  label="Medidas" 
+                  value={isEditing ? (editedLead.budget.medidas || '') : (selectedLead.budget.medidas || 'N/A')} 
+                  isEditing={isEditing}
+                  onChange={(val) => handleEditChange('medidas', val, true)}
+                />
+                <DetailBox 
+                  label="WhatsApp" 
+                  value={isEditing ? (editedLead.budget.whatsapp || '') : (selectedLead.budget.whatsapp || 'N/A')} 
+                  isEditing={isEditing}
+                  onChange={(val) => handleEditChange('whatsapp', val, true)}
+                />
               </div>
 
               {selectedLead.budget.acessorios && selectedLead.budget.acessorios.length > 0 && (
@@ -305,9 +405,17 @@ export default function Dashboard() {
                   <div className="w-1.5 h-1.5 rounded-full bg-[#F7D634]" />
                   <h3 className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Observações do projeto</h3>
                 </div>
-                <p className="text-[22px] leading-snug max-w-3xl font-medium tracking-tight break-words whitespace-pre-wrap text-neutral-700">
-                  "{selectedLead.budget.descricao}"
-                </p>
+                {isEditing ? (
+                  <textarea 
+                    value={editedLead.budget.descricao}
+                    onChange={(e) => handleEditChange('descricao', e.target.value, true)}
+                    className="w-full p-4 rounded-2xl border border-neutral-200 text-[18px] font-medium focus:ring-2 focus:ring-[#F7D634] outline-none min-h-[150px] resize-none"
+                  />
+                ) : (
+                  <p className="text-[22px] leading-snug max-w-3xl font-medium tracking-tight break-words whitespace-pre-wrap text-neutral-700">
+                    "{selectedLead.budget.descricao}"
+                  </p>
+                )}
               </section>
 
               {/* Actions */}
@@ -387,11 +495,20 @@ function AppleBadge({ status }) {
   );
 }
 
-function DetailBox({ label, value }) {
+function DetailBox({ label, value, isEditing = false, onChange }) {
   return (
     <div className="space-y-2">
       <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">{label}</p>
-      <p className="text-[18px] font-bold tracking-tight text-black">{value}</p>
+      {isEditing && onChange ? (
+        <input 
+          type="text" 
+          value={value} 
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full p-2 -ml-2 rounded-lg border-neutral-200 text-[18px] font-bold tracking-tight text-black focus:ring-1 focus:ring-[#F7D634] outline-none bg-black/5 border"
+        />
+      ) : (
+        <p className="text-[18px] font-bold tracking-tight text-black">{value}</p>
+      )}
     </div>
   );
 }
