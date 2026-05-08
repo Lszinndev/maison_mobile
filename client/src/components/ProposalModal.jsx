@@ -1,277 +1,307 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Cancel01Icon, 
-  PrinterIcon, 
-  Message01Icon, 
-  SquareIcon,
-  Tick01Icon,
-  CircleIcon,
-  PencilEdit01Icon,
-  ViewIcon
-} from 'hugeicons-react';
+import React, { useState } from 'react';
+import { Cancel01Icon, FileAttachmentIcon, ArrowRight01Icon } from 'hugeicons-react';
 import logoImg from '../assets/logo.webp';
 
 export default function ProposalModal({ isOpen, onClose, lead }) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedData, setEditedData] = useState(null);
+  if (!isOpen || !lead) return null;
 
-  useEffect(() => {
-    if (lead) {
-      setEditedData({
-        name: lead.name,
-        ambiente: lead.budget.ambiente,
-        estilo: lead.budget.estilo,
-        mdf: lead.budget.mdf,
-        ferragens: lead.budget.ferragens || lead.budget.marcaFerragem || 'N/A',
-        medidas: lead.budget.medidas || 'Sob Medida',
-        puxadores: lead.budget.puxadores || 'N/A',
-        descricao: lead.budget.descricao,
-        valor: '',
-        validade: '15 dias'
-      });
+  const [formData, setFormData] = useState({
+    valorTotal: '',
+    sinal: '',
+    parcelamento: '',
+    validade: '15 dias',
+    observacoesExtras: ''
+  });
+
+  const formatCurrency = (value) => {
+    if (!value) return '';
+    const cleanValue = value.replace(/\D/g, '');
+    if (!cleanValue) return '';
+    const formatter = new Intl.NumberFormat('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    return formatter.format(parseFloat(cleanValue) / 100);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    if (name === 'valorTotal' || name === 'sinal') {
+      const maskedValue = formatCurrency(value);
+      setFormData(prev => ({ ...prev, [name]: maskedValue }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
     }
-  }, [lead]);
-
-  if (!isOpen || !lead || !editedData) return null;
+  };
 
   const handlePrint = () => {
     window.print();
   };
 
-  const handleWhatsApp = () => {
-    const message = `Olá ${editedData.name}, aqui é da Maison Mobile! %0A%0ARecebemos sua solicitação para o projeto de ${editedData.ambiente}.%0A%0A*Resumo do Projeto:*%0A- Estilo: ${editedData.estilo}%0A- Acabamento: ${editedData.mdf}%0A- Ferragens: ${editedData.ferragens}%0A%0A*Observações:* ${editedData.descricao}%0A%0A*Investimento Estimado:* ${editedData.valor || 'A definir'}%0A%0AVamos agendar uma reunião para detalharmos os valores?`;
-    
+  const handleSendWhatsApp = () => {
     const phone = lead.budget.whatsapp?.replace(/\D/g, '') || '';
-    window.open(`https://wa.me/55${phone}?text=${message}`, '_blank');
-  };
+    if (!phone) {
+      alert("Número de WhatsApp não encontrado no lead.");
+      return;
+    }
+    const text = `Olá ${lead.name.split(' ')[0]}, tudo bem?
+Aqui é da Maison Mobile. Segue em anexo a proposta para o seu projeto de ${lead.budget.ambiente}.
+    
+Valor Total: R$ ${formData.valorTotal || 'A combinar'}
+Condições: ${formData.parcelamento || 'Sob consulta'}
 
-  const handleChange = (field, value) => {
-    setEditedData(prev => ({ ...prev, [field]: value }));
+(Por favor, nos envie o arquivo PDF baixado aqui nesta conversa!)`;
+    const url = `https://wa.me/55${phone}?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10 bg-black/40 backdrop-blur-sm animate-fade-in print:p-0 print:bg-white print:backdrop-blur-none">
-      
-      {/* Container do Modal */}
-      <div className="bg-white w-full max-w-5xl h-full max-h-[95vh] overflow-hidden rounded-[40px] shadow-2xl flex flex-col animate-fade-up print:max-h-none print:rounded-none print:shadow-none">
+    <div className="fixed inset-0 z-[100] flex bg-white/80 backdrop-blur-md animate-fade-in">
+      <style>{`
+        @media print {
+          @page {
+            size: A4;
+            margin: 0;
+          }
+          html, body {
+            height: 100%;
+            margin: 0 !important; 
+            padding: 0 !important;
+            overflow: hidden;
+          }
+          body * {
+            visibility: hidden !important;
+          }
+          #print-area, #print-area * {
+            visibility: visible !important;
+          }
+          #print-area {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 210mm !important;
+            min-height: 297mm !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+            box-shadow: none !important;
+            z-index: 9999 !important;
+          }
+          .no-print {
+            display: none !important;
+          }
+        }
+      `}</style>
+
+      <div className="flex w-full h-full">
         
-        {/* Header - Escondido no Print */}
-        <header className="p-8 border-b flex justify-between items-center shrink-0 print:hidden bg-neutral-50/50">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-[#F7D634] rounded-xl flex items-center justify-center shadow-lg shadow-[#F7D634]/20">
-              <Tick01Icon size={20} className="text-black" />
-            </div>
+        {/* Left Side: Controls & Form */}
+        <div className="w-[400px] border-r border-neutral-200 bg-[#F5F5F7] flex flex-col h-full shadow-2xl z-10 shrink-0 no-print">
+          <header className="p-6 border-b border-neutral-200 bg-white flex justify-between items-center">
             <div>
-              <h2 className="text-lg font-bold tracking-tight">Editor de Proposta</h2>
-              <p className="text-[11px] text-neutral-400 font-bold uppercase tracking-widest">Ajuste os campos antes de gerar o documento</p>
+              <h2 className="text-lg font-bold text-black tracking-tight">Estúdio de Propostas</h2>
+              <p className="text-xs text-neutral-500">Editando proposta para {lead.name}</p>
+            </div>
+            <button onClick={onClose} className="p-2 text-neutral-400 hover:text-black transition-colors rounded-full hover:bg-neutral-100">
+              <Cancel01Icon size={20} />
+            </button>
+          </header>
+
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            <div className="space-y-4">
+              <h3 className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest">Valores & Pagamento</h3>
+              
+              <div className="space-y-1.5">
+                <label className="text-[12px] font-semibold text-neutral-600">Valor Total (R$)</label>
+                <input 
+                  type="text" name="valorTotal" value={formData.valorTotal} onChange={handleInputChange}
+                  placeholder="Ex: 15.500,00"
+                  className="w-full p-3 rounded-xl border border-neutral-200 text-sm focus:ring-2 focus:ring-[#F7D634] outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[12px] font-semibold text-neutral-600">Entrada / Sinal</label>
+                <input 
+                  type="text" name="sinal" value={formData.sinal} onChange={handleInputChange}
+                  placeholder="Ex: 40% na assinatura"
+                  className="w-full p-3 rounded-xl border border-neutral-200 text-sm focus:ring-2 focus:ring-[#F7D634] outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[12px] font-semibold text-neutral-600">Condição Restante</label>
+                <input 
+                  type="text" name="parcelamento" value={formData.parcelamento} onChange={handleInputChange}
+                  placeholder="Ex: Saldo em até 6x no cartão"
+                  className="w-full p-3 rounded-xl border border-neutral-200 text-sm focus:ring-2 focus:ring-[#F7D634] outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-4 pt-4 border-t border-neutral-200">
+              <h3 className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest">Gerais</h3>
+              
+              <div className="space-y-1.5">
+                <label className="text-[12px] font-semibold text-neutral-600">Validade da Proposta</label>
+                <input 
+                  type="text" name="validade" value={formData.validade} onChange={handleInputChange}
+                  placeholder="Ex: 15 dias"
+                  className="w-full p-3 rounded-xl border border-neutral-200 text-sm focus:ring-2 focus:ring-[#F7D634] outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[12px] font-semibold text-neutral-600">Observações Extras</label>
+                <textarea 
+                  name="observacoesExtras" value={formData.observacoesExtras} onChange={handleInputChange}
+                  placeholder="Itens que não estão inclusos, observações de montagem..."
+                  className="w-full p-3 rounded-xl border border-neutral-200 text-sm focus:ring-2 focus:ring-[#F7D634] outline-none min-h-[100px] resize-none"
+                />
+              </div>
             </div>
           </div>
-          
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => setIsEditing(!isEditing)}
-              className={`px-5 py-2.5 text-[13px] font-bold rounded-xl transition-all flex items-center gap-2 border ${
-                isEditing 
-                  ? 'bg-black text-white border-black' 
-                  : 'bg-white text-black border-neutral-200 hover:bg-neutral-50'
-              }`}
-            >
-              {isEditing ? <ViewIcon size={18} /> : <PencilEdit01Icon size={18} />}
-              {isEditing ? 'Visualizar Documento' : 'Editar Campos'}
-            </button>
 
-            <div className="w-px h-6 bg-neutral-200 mx-2" />
-
+          <div className="p-6 bg-white border-t border-neutral-200 space-y-3 no-print">
             <button 
               onClick={handlePrint}
-              className="px-5 py-2.5 bg-neutral-100 hover:bg-neutral-200 text-black text-[13px] font-bold rounded-xl transition-all flex items-center gap-2"
+              className="w-full py-3.5 bg-black hover:bg-neutral-800 text-white font-bold text-sm rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg"
             >
-              <PrinterIcon size={18} /> Imprimir PDF
+              <FileAttachmentIcon size={18} /> Gerar PDF / Imprimir
             </button>
             <button 
-              onClick={handleWhatsApp}
-              className="px-5 py-2.5 bg-[#25D366] hover:bg-[#20ba57] text-white text-[13px] font-bold rounded-xl transition-all flex items-center gap-2 shadow-lg shadow-[#25D366]/20"
+              onClick={handleSendWhatsApp}
+              className="w-full py-3.5 bg-[#25D366] hover:bg-[#20ba57] text-white font-bold text-sm rounded-xl transition-all flex items-center justify-center gap-2 shadow-md"
             >
-              <Message01Icon size={18} /> Enviar WhatsApp
-            </button>
-            
-            <button onClick={onClose} className="ml-4 p-2 text-neutral-400 hover:text-black transition-all">
-              <Cancel01Icon size={24} />
+              <ArrowRight01Icon size={18} /> Enviar no WhatsApp
             </button>
           </div>
-        </header>
+        </div>
 
-        {/* Área do Documento */}
-        <div className="flex-1 overflow-y-auto p-12 md:p-20 scrollbar-hide bg-[#FDFDFD] print:overflow-visible print:bg-white">
+        {/* Right Side: PDF Live Preview Background */}
+        <div className="flex-1 bg-[#f5f5f5] overflow-y-auto p-12 flex justify-center items-start print:p-0 print:bg-white">
           
-          <div className="max-w-[800px] mx-auto space-y-16">
+          {/* A4 Container (210mm x 297mm aspect ratio approx) */}
+          <div 
+            id="print-area"
+            className="bg-[#ffffff] w-[210mm] min-h-[297mm] shadow-2xl relative shrink-0 flex flex-col"
+          >
+            {/* --- INÍCIO DO CONTEÚDO DO PDF --- */}
             
-            {/* Logo & Info Empresa */}
-            <div className="flex justify-between items-start">
-              <img src={logoImg} alt="Maison Mobile" className="h-14 w-auto grayscale print:grayscale-0" />
-              <div className="text-right space-y-1">
-                <p className="text-[10px] font-bold text-[#F7D634] uppercase tracking-[0.2em]">Marcenaria de Alto Padrão</p>
-                <p className="text-[12px] text-neutral-500 font-medium">maisonmobile.com.br</p>
-                <p className="text-[12px] text-neutral-500 font-medium">(21) 99999-0000</p>
-              </div>
-            </div>
-
-            {/* Título e Cliente */}
-            <div className="space-y-8 pt-10 border-t border-neutral-100">
-              <h1 className="text-5xl font-bold tracking-tighter text-black">Especificações do Projeto</h1>
-              <div className="grid grid-cols-2 gap-10">
-                <div className="space-y-2">
-                  <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Preparado para</p>
-                  {isEditing ? (
-                    <input 
-                      className="w-full text-xl font-bold text-black border-b-2 border-[#F7D634] outline-none bg-neutral-50 px-2 py-1"
-                      value={editedData.name}
-                      onChange={(e) => handleChange('name', e.target.value)}
-                    />
-                  ) : (
-                    <>
-                      <p className="text-xl font-bold text-black">{editedData.name}</p>
-                      <p className="text-sm text-neutral-500">{lead.email}</p>
-                    </>
-                  )}
-                </div>
-                <div className="text-right space-y-2">
-                  <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Validade da Proposta</p>
-                  {isEditing ? (
-                    <input 
-                      className="w-full text-xl font-bold text-black text-right border-b-2 border-[#F7D634] outline-none bg-neutral-50 px-2 py-1"
-                      value={editedData.validade}
-                      onChange={(e) => handleChange('validade', e.target.value)}
-                    />
-                  ) : (
-                    <>
-                      <p className="text-xl font-bold text-black">{editedData.validade}</p>
-                      <p className="text-sm text-neutral-500">Emitido em: {new Date().toLocaleDateString('pt-BR')}</p>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Detalhes Técnicos - Grid Editável */}
-            <div className="grid grid-cols-2 gap-y-12 gap-x-20">
-              <EditableField 
-                label="Ambiente Principal" 
-                value={editedData.ambiente} 
-                isEditing={isEditing} 
-                onChange={(val) => handleChange('ambiente', val)} 
-              />
-              <EditableField 
-                label="Estilo de Design" 
-                value={editedData.estilo} 
-                isEditing={isEditing} 
-                onChange={(val) => handleChange('estilo', val)} 
-              />
-              <EditableField 
-                label="Acabamento Externo" 
-                value={editedData.mdf} 
-                isEditing={isEditing} 
-                onChange={(val) => handleChange('mdf', val)} 
-              />
-              <EditableField 
-                label="Padrão de Ferragens" 
-                value={editedData.ferragens} 
-                isEditing={isEditing} 
-                onChange={(val) => handleChange('ferragens', val)} 
-              />
-              <EditableField 
-                label="Dimensões Iniciais" 
-                value={editedData.medidas} 
-                isEditing={isEditing} 
-                onChange={(val) => handleChange('medidas', val)} 
-              />
-              <EditableField 
-                label="Puxadores" 
-                value={editedData.puxadores} 
-                isEditing={isEditing} 
-                onChange={(val) => handleChange('puxadores', val)} 
-              />
-            </div>
-
-            {/* Acessórios (Visual apenas, mantido para o PDF) */}
-            {lead.budget.acessorios && lead.budget.acessorios.length > 0 && (
-              <div className="space-y-6 pt-10 border-t border-neutral-100">
-                <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Acessórios Incluídos</p>
-                <div className="flex flex-wrap gap-2">
-                  {lead.budget.acessorios.map((acc, i) => (
-                    <span key={i} className="px-4 py-2 bg-neutral-50 border border-neutral-100 rounded-xl text-xs font-bold text-neutral-700">
-                      {acc}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Descrição - Texto Longo Editável */}
-            <div className="space-y-6 pt-10 border-t border-neutral-100">
-              <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Resumo das Necessidades</p>
-              {isEditing ? (
-                <textarea 
-                  className="w-full text-xl leading-relaxed text-neutral-700 italic font-medium border-2 border-[#F7D634] outline-none bg-neutral-50 p-6 rounded-2xl min-h-[150px] resize-none"
-                  value={editedData.descricao}
-                  onChange={(e) => handleChange('descricao', e.target.value)}
+            {/* Header (Top Yellow Bar + Logo) */}
+            <div className="h-4 bg-[#F7D634] w-full absolute top-0 left-0" />
+            <div className="px-10 pt-10 pb-6 flex justify-between items-start border-b border-[#f5f5f5]">
+              <div>
+                <img 
+                  src={logoImg} 
+                  alt="Maison Mobile" 
+                  className="h-8 object-contain invert grayscale mb-2" 
                 />
-              ) : (
-                <p className="text-xl leading-relaxed text-neutral-700 italic font-medium">
-                  "{editedData.descricao}"
-                </p>
+                <p className="text-[10px] text-[#a3a3a3] uppercase tracking-widest font-bold">Proposta Comercial</p>
+                <h1 className="text-3xl font-bold text-[#000000] tracking-tight mt-1">Projeto: {lead.budget.ambiente}</h1>
+              </div>
+              <div className="text-right space-y-1">
+                <p className="text-[12px] font-bold text-[#000000]">Maison Mobile</p>
+                <p className="text-[11px] text-[#737373]">contato@maison.com</p>
+                <p className="text-[11px] text-[#737373]">(41) 3000-0000</p>
+                <p className="text-[11px] text-[#737373] mt-2">Data: {new Date().toLocaleDateString('pt-BR')}</p>
+              </div>
+            </div>
+
+            {/* Client Info */}
+            <div className="px-10 py-5 bg-[#fafafa]/50">
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <p className="text-[9px] font-bold text-[#a3a3a3] uppercase tracking-widest mb-1">Cliente</p>
+                  <p className="text-[14px] font-semibold text-[#000000]">{lead.name}</p>
+                  <p className="text-[12px] text-[#737373]">{lead.email}</p>
+                  <p className="text-[12px] text-[#737373]">{lead.budget.whatsapp}</p>
+                </div>
+                <div>
+                  <p className="text-[9px] font-bold text-[#a3a3a3] uppercase tracking-widest mb-1">Detalhes Base</p>
+                  <p className="text-[12px] text-[#525252]"><span className="font-semibold text-[#000000]">Medidas:</span> {lead.budget.medidas || 'N/A'}</p>
+                  <p className="text-[12px] text-[#525252]"><span className="font-semibold text-[#000000]">Estilo:</span> {lead.budget.estilo || 'N/A'}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Specifications */}
+            <div className="px-10 py-6 space-y-5 flex-1">
+              <div>
+                <h2 className="text-[14px] font-bold text-[#000000] border-b border-[#e5e5e5] pb-1.5 mb-3">Especificações Técnicas</h2>
+                <div className="grid grid-cols-2 gap-3 text-[12px]">
+                  <p><span className="font-semibold text-[#404040]">Material/Acabamento:</span> {lead.budget.mdf || 'N/A'}</p>
+                  <p><span className="font-semibold text-[#404040]">Ferragens:</span> {lead.budget.ferragens || 'N/A'}</p>
+                  <p><span className="font-semibold text-[#404040]">Puxadores:</span> {lead.budget.puxadores || 'N/A'}</p>
+                </div>
+              </div>
+
+              {lead.budget.acessorios && lead.budget.acessorios.length > 0 && (
+                <div>
+                  <h2 className="text-[14px] font-bold text-[#000000] border-b border-[#e5e5e5] pb-1.5 mb-3">Acessórios Inclusos</h2>
+                  <ul className="list-disc list-inside text-[12px] text-[#525252] space-y-1">
+                    {lead.budget.acessorios.map((acc, i) => (
+                      <li key={i}>{acc}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {lead.budget.descricao && (
+                <div>
+                  <h2 className="text-[14px] font-bold text-[#000000] border-b border-[#e5e5e5] pb-1.5 mb-3">Observações do Cliente / Descritivo</h2>
+                  <p className="text-[12px] text-[#525252] leading-relaxed whitespace-pre-wrap">
+                    "{lead.budget.descricao}"
+                  </p>
+                </div>
               )}
             </div>
 
-            {/* Footer do Doc */}
-            <div className="pt-20 space-y-10">
-              <div className="h-px bg-neutral-200 w-full" />
-              <div className="flex justify-between items-end">
-                <div className="space-y-4">
-                  <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Assinatura do Consultor</p>
-                  <div className="w-64 h-px bg-black" />
-                  <p className="text-sm font-bold">Maison Mobile Design</p>
+            {/* Financial Summary */}
+            <div className="px-10 py-6 bg-[#F5F5F7]">
+              <h2 className="text-[14px] font-bold text-[#000000] border-b border-[#e5e5e5] pb-1.5 mb-4">Resumo de Valores</h2>
+              
+              <div className="space-y-4">
+                <div className="flex justify-between items-end">
+                  <span className="text-[14px] font-semibold text-[#404040]">Investimento Total</span>
+                  <span className="text-[24px] font-bold text-[#000000]">R$ {formData.valorTotal || '0,00'}</span>
                 </div>
-                <div className="text-right space-y-2">
-                  <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Investimento Estimado</p>
-                  {isEditing ? (
-                    <input 
-                      placeholder="Ex: R$ 15.000,00"
-                      className="text-right text-4xl font-bold text-black border-b-2 border-[#F7D634] outline-none bg-neutral-50 px-2 py-1 max-w-[300px]"
-                      value={editedData.valor}
-                      onChange={(e) => handleChange('valor', e.target.value)}
-                    />
-                  ) : (
-                    <>
-                      <p className="text-4xl font-bold text-black">{editedData.valor || 'A DEFINIR'}</p>
-                      <p className="text-[11px] text-neutral-400 mt-2 font-medium">Sujeito a alteração após medição técnica</p>
-                    </>
-                  )}
+                
+                <div className="grid grid-cols-2 gap-4 pt-3 border-t border-[#e5e5e5]">
+                  <div>
+                    <p className="text-[10px] font-bold text-[#a3a3a3] uppercase tracking-widest mb-1">Entrada / Sinal</p>
+                    <p className="text-[13px] font-medium text-[#000000]">{formData.sinal ? `R$ ${formData.sinal}` : '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-[#a3a3a3] uppercase tracking-widest mb-1">Saldo</p>
+                    <p className="text-[13px] font-medium text-[#000000]">{formData.parcelamento || '-'}</p>
+                  </div>
                 </div>
               </div>
             </div>
 
+            {/* Extra Notes & Footer */}
+            <div className="px-10 py-5 space-y-4">
+              {(formData.observacoesExtras || formData.validade) && (
+                <div className="text-[10px] text-[#737373] space-y-1.5 border border-[#e5e5e5] p-3 rounded-xl bg-[#fafafa]">
+                  {formData.validade && <p><span className="font-bold text-[#000000]">Validade da proposta:</span> {formData.validade}</p>}
+                  {formData.observacoesExtras && (
+                    <p className="whitespace-pre-wrap leading-snug"><span className="font-bold text-[#000000]">Observações da loja:</span><br/>{formData.observacoesExtras}</p>
+                  )}
+                </div>
+              )}
+
+              <div className="text-center pt-8 mt-4">
+                <div className="w-64 border-t border-black mx-auto mb-2" />
+                <p className="text-[12px] font-bold text-[#000000]">{lead.name}</p>
+                <p className="text-[10px] font-bold tracking-widest text-[#a3a3a3] uppercase mt-1">Assinatura do Cliente</p>
+              </div>
+            </div>
+            
+            {/* --- FIM DO CONTEÚDO DO PDF --- */}
           </div>
         </div>
       </div>
     </div>
   );
 }
-
-function EditableField({ label, value, isEditing, onChange }) {
-  return (
-    <div className="space-y-2">
-      <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">{label}</p>
-      {isEditing ? (
-        <input 
-          className="w-full text-lg font-bold text-black border-b-2 border-[#F7D634] outline-none bg-neutral-50 px-2 py-1"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      ) : (
-        <p className="text-lg font-bold text-black">{value}</p>
-      )}
-    </div>
-  );
-}
-

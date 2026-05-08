@@ -32,7 +32,7 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('Todos');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [isProposalOpen, setIsProposalOpen] = useState(false);
+  const [isProposalModalOpen, setIsProposalModalOpen] = useState(false);
   const leadsPerPage = 8;
 
   // Resetar para a primeira página ao buscar ou filtrar
@@ -262,7 +262,7 @@ export default function Dashboard() {
               <div className="flex gap-3">
                 <button className="px-6 py-2.5 text-[13px] font-bold rounded-xl border transition-all bg-white text-black border-neutral-200 hover:bg-neutral-50">Editar</button>
                 <button 
-                  onClick={() => setIsProposalOpen(true)}
+                  onClick={() => setIsProposalModalOpen(true)}
                   className="px-6 py-2.5 text-[13px] font-bold rounded-xl transition-all bg-black text-white hover:bg-neutral-800"
                 >
                   Gerar Proposta
@@ -330,10 +330,10 @@ export default function Dashboard() {
         )}
       </main>
 
-      {/* Modal de Proposta Comercial */}
+      {/* Modals */}
       <ProposalModal 
-        isOpen={isProposalOpen} 
-        onClose={() => setIsProposalOpen(false)} 
+        isOpen={isProposalModalOpen} 
+        onClose={() => setIsProposalModalOpen(false)} 
         lead={selectedLead} 
       />
     </div>
