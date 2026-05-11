@@ -35,6 +35,7 @@ export default function Dashboard() {
   const [isProposalModalOpen, setIsProposalModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedLead, setEditedLead] = useState(null);
+  const [viewingPhoto, setViewingPhoto] = useState(null);
   const leadsPerPage = 8;
 
   // Resetar para a primeira página ao buscar ou filtrar
@@ -418,6 +419,29 @@ export default function Dashboard() {
                 )}
               </section>
 
+              {selectedLead.budget.fotos && selectedLead.budget.fotos.length > 0 && (
+                <section className="space-y-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#F7D634]" />
+                    <h3 className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Fotos de Referência</h3>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    {selectedLead.budget.fotos.map((foto, idx) => (
+                      <div 
+                        key={idx} 
+                        onClick={() => setViewingPhoto(foto)}
+                        className="group relative aspect-square rounded-2xl overflow-hidden border border-neutral-200 shadow-sm cursor-pointer hover:shadow-md transition-all bg-neutral-50"
+                      >
+                        <img src={foto} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <span className="text-white text-[10px] font-bold uppercase tracking-widest">Abrir Foto</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
               {/* Actions */}
               <section className="space-y-6 pt-16 border-t border-neutral-100">
                  <h3 className="text-[11px] font-bold text-zinc-600 uppercase tracking-[0.2em]">Gestão de Status</h3>
@@ -444,6 +468,24 @@ export default function Dashboard() {
         onClose={() => setIsProposalModalOpen(false)} 
         lead={selectedLead} 
       />
+
+      {/* Lightbox Modal */}
+      {viewingPhoto && (
+        <div 
+          className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-sm flex items-center justify-center p-10 animate-fade-in"
+          onClick={() => setViewingPhoto(null)}
+        >
+          <button className="absolute top-10 right-10 text-white/50 hover:text-white transition-colors">
+            <Cancel01Icon size={32} />
+          </button>
+          <img 
+            src={viewingPhoto} 
+            className="max-w-full max-h-full object-contain shadow-2xl rounded-lg animate-scale-in" 
+            alt="Reference" 
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }

@@ -12,6 +12,7 @@ import {
   HangerIcon,
   DiamondIcon,
   JoggerPantsIcon,
+  FileAttachmentIcon,
   BulbIcon,
   MirrorIcon,
   TowelsIcon,
@@ -51,7 +52,8 @@ export default function BudgetModal({ isOpen, onClose }) {
     nome: '',
     email: '',
     telefone: '',
-    descricao: ''
+    descricao: '',
+    fotos: []
   });
 
   const [isChatFinished, setIsChatFinished] = useState(false);
@@ -71,12 +73,83 @@ export default function BudgetModal({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  const nextStep = () => setStep((prev) => Math.min(prev + 1, 6));
+  const nextStep = () => {
+    if (isStepValid(step)) {
+      setStep((prev) => Math.min(prev + 1, 7));
+    }
+  };
   const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
+
+  const isStepValid = (stepNum) => {
+    switch (stepNum) {
+      case 1: return formData.ambiente !== '';
+      case 2: return formData.largura !== '' && formData.altura !== '' && formData.estilo !== '';
+      case 3: return formData.mdf !== '' && formData.marcaFerragem !== '';
+      case 4: return true; // Acessórios são opcionais
+      case 5: return formData.puxadores !== '';
+      case 6: return formData.nome !== '' && formData.email !== '' && formData.telefone !== '';
+      default: return true;
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({ 
+          ...prev, 
+          fotos: [...prev.fotos, reader.result] 
+        }));
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removePhoto = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      fotos: prev.fotos.filter((_, i) => i !== index)
+    }));
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+
+  const handleNumericChange = (e) => {
+    const { name, value } = e.target;
+    // Remove tudo que não é número ou ponto
+    let val = value.replace(/[^0-9.]/g, '');
+    
+    // Garante que só exista um ponto decimal
+    const parts = val.split('.');
+    if (parts.length > 2) {
+      val = parts[0] + '.' + parts.slice(1).join('');
+    }
+
+    setFormData({ ...formData, [name]: val });
+  };
+
+  const handlePhoneChange = (e) => {
+    let val = e.target.value.replace(/\D/g, '');
+    if (val.length > 11) val = val.slice(0, 11);
+    
+    if (val.length > 7) {
+      val = `(${val.slice(0, 2)}) ${val.slice(2, 7)}-${val.slice(7)}`;
+    } else if (val.length > 2) {
+      val = `(${val.slice(0, 2)}) ${val.slice(2)}`;
+    } else if (val.length > 0) {
+      val = `(${val}`;
+    }
+    setFormData({ ...formData, telefone: val });
+  };
+
+  const handleNameChange = (e) => {
+    const val = e.target.value.replace(/[0-9]/g, '');
+    setFormData({ ...formData, nome: val });
   };
 
   const handleAcessorioToggle = (acessorio) => {
@@ -114,12 +187,26 @@ export default function BudgetModal({ isOpen, onClose }) {
           medidas: `${formData.largura}m x ${formData.altura}m`,
           whatsapp: formData.telefone,
           acessorios: formData.acessorios,
-          descricao: formData.descricao
+          descricao: formData.descricao,
+          fotos: formData.fotos
         }
       };
 
-      const existingLeads = JSON.parse(localStorage.getItem('leads') || '[]');
-      localStorage.setItem('leads', JSON.stringify([newLead, ...existingLeads]));
+      try {
+        const existingLeads = JSON.parse(localStorage.getItem('leads') || '[]');
+        localStorage.setItem('leads', JSON.stringify([newLead, ...existingLeads]));
+      } catch (error) {
+        console.error('Erro ao salvar no localStorage:', error);
+        // Fallback: Tenta salvar sem as fotos se o limite for atingido
+        try {
+          const simplifiedLead = { ...newLead, budget: { ...newLead.budget, fotos: [] } };
+          const existingLeads = JSON.parse(localStorage.getItem('leads') || '[]');
+          localStorage.setItem('leads', JSON.stringify([simplifiedLead, ...existingLeads]));
+          alert("Aviso: O orçamento foi enviado, mas as fotos eram muito grandes para serem salvas localmente.");
+        } catch (e) {
+          console.error('Erro crítico no localStorage:', e);
+        }
+      }
       
       setIsBotTyping(false);
       setIsChatFinished(true);
@@ -181,8 +268,8 @@ export default function BudgetModal({ isOpen, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/40 backdrop-blur-xl animate-fade-in">
-      <div className="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[32px] shadow-2xl relative animate-fade-up scrollbar-hide">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-xl animate-fade-in">
+      <div className="bg-white w-full max-w-2xl max-h-[95vh] rounded-[32px] shadow-2xl relative animate-fade-up overflow-hidden flex flex-col">
         
         {/* Progress Header */}
         <div className="absolute top-0 left-0 w-full h-1.5 bg-neutral-100 overflow-hidden">
@@ -193,19 +280,19 @@ export default function BudgetModal({ isOpen, onClose }) {
         </div>
 
         {/* Close Button */}
-        <button onClick={onClose} className="absolute top-8 right-8 text-neutral-400 hover:text-black transition-all z-10">
+        <button onClick={onClose} className="absolute top-6 right-6 text-neutral-400 hover:text-black transition-all z-20">
           <Cancel01Icon size={24} />
         </button>
 
-        <div className="p-10 md:p-14">
+        <div className="p-8 md:p-10 flex-1 overflow-y-auto scrollbar-hide">
           {step <= 6 && (
-            <div className="mb-10 flex items-center gap-2">
+            <div className="mb-6 flex items-center gap-2">
               <span className="px-2.5 py-1 bg-[#F7D634] text-black text-[10px] font-bold rounded-md tracking-wider">PASSO {step}</span>
               <span className="text-[11px] text-neutral-400 font-bold uppercase tracking-widest">de 6</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="min-h-[400px] flex flex-col">
+          <form onSubmit={handleSubmit} className="flex flex-col h-full">
             
             {/* STEP 1: AMBIENTE */}
             {step === 1 && (
@@ -216,25 +303,28 @@ export default function BudgetModal({ isOpen, onClose }) {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   {[
-                    { id: 'Cozinha', name: 'Cozinha', img: cozinhaImg, icon: <ChefHatIcon size={32}/> },
-                    { id: 'Closet', name: 'Closet', img: quartoImg, icon: <BedIcon size={32}/> },
-                    { id: 'Banheiro', name: 'B.W.C. / Banheiro', img: banheiroImg, icon: <Toilet01Icon size={32}/> },
-                    { id: 'Lavanderia', name: 'Lavanderia', img: banheiroImg, icon: <WashingMachineIcon size={32}/> }
+                    { id: 'Cozinha', name: 'Cozinha', img: cozinhaImg, icon: <ChefHatIcon size={28}/> },
+                    { id: 'Closet', name: 'Closet', img: quartoImg, icon: <BedIcon size={28}/> },
+                    { id: 'Banheiro', name: 'B.W.C. / Banheiro', img: banheiroImg, icon: <Toilet01Icon size={28}/> },
+                    { id: 'Lavanderia', name: 'Lavanderia', img: banheiroImg, icon: <WashingMachineIcon size={28}/> }
                   ].map((amb) => (
                     <button
                       key={amb.id}
                       type="button"
-                      onClick={() => { setFormData({ ...formData, ambiente: amb.id }); nextStep(); }}
-                      className={`group relative h-48 rounded-3xl overflow-hidden border-2 transition-all ${
+                      onClick={() => { 
+                        setFormData({ ...formData, ambiente: amb.id }); 
+                        setStep(2); 
+                      }}
+                      className={`group relative h-40 rounded-3xl overflow-hidden border-2 transition-all ${
                         formData.ambiente === amb.id ? 'border-[#F7D634]' : 'border-transparent hover:scale-[1.02]'
                       }`}
                     >
                       <img src={amb.img} className="absolute inset-0 w-full h-full object-cover brightness-[0.4] group-hover:brightness-[0.6] transition-all" />
-                      <div className="absolute inset-0 flex flex-col justify-end p-6 text-white text-left">
-                        <div className="bg-white/10 backdrop-blur-md w-fit p-3 rounded-2xl mb-4 group-hover:scale-110 transition-transform">
+                      <div className="absolute inset-0 flex flex-col justify-end p-5 text-white text-left">
+                        <div className="bg-white/10 backdrop-blur-md w-fit p-2.5 rounded-2xl mb-3 group-hover:scale-110 transition-transform">
                           {amb.icon}
                         </div>
-                        <span className="text-lg font-bold tracking-tight">{amb.name}</span>
+                        <span className="text-base font-bold tracking-tight">{amb.name}</span>
                       </div>
                     </button>
                   ))}
@@ -244,10 +334,10 @@ export default function BudgetModal({ isOpen, onClose }) {
 
             {/* STEP 2: MEDIDAS & ESTILO */}
             {step === 2 && (
-              <div className="space-y-12 animate-fade-in">
-                <div className="space-y-2">
-                  <h2 className="text-3xl font-bold tracking-tight">Medidas & Estilo</h2>
-                  <p className="text-neutral-500">Defina o tamanho aproximado e a estética do seu móvel.</p>
+              <div className="space-y-8 animate-fade-in">
+                <div className="space-y-1">
+                  <h2 className="text-2xl font-bold tracking-tight">Medidas & Estilo</h2>
+                  <p className="text-sm text-neutral-500">Defina o tamanho aproximado e a estética do seu móvel.</p>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-8">
@@ -256,8 +346,8 @@ export default function BudgetModal({ isOpen, onClose }) {
                       <RulerIcon size={14} /> Largura (m)
                     </label>
                     <input 
-                      type="number" step="0.01" name="largura" value={formData.largura} onChange={handleInputChange}
-                      placeholder="Ex: 2.50" className="w-full bg-neutral-50 border-none rounded-2xl px-6 py-4 outline-none focus:ring-2 focus:ring-[#F7D634]/50 transition-all font-medium text-black placeholder:text-neutral-400"
+                      type="text" name="largura" value={formData.largura} onChange={handleNumericChange}
+                      placeholder="Ex: 2.50" className="w-full bg-neutral-50 border-none rounded-2xl px-5 py-3 outline-none focus:ring-2 focus:ring-[#F7D634]/50 transition-all font-medium text-black placeholder:text-neutral-400"
                     />
                   </div>
                   <div className="space-y-3">
@@ -265,8 +355,8 @@ export default function BudgetModal({ isOpen, onClose }) {
                       <RulerIcon size={14} className="rotate-90" /> Altura (m)
                     </label>
                     <input 
-                      type="number" step="0.01" name="altura" value={formData.altura} onChange={handleInputChange}
-                      placeholder="Ex: 2.70" className="w-full bg-neutral-50 border-none rounded-2xl px-6 py-4 outline-none focus:ring-2 focus:ring-[#F7D634]/50 transition-all font-medium text-black placeholder:text-neutral-400"
+                      type="text" name="altura" value={formData.altura} onChange={handleNumericChange}
+                      placeholder="Ex: 2.70" className="w-full bg-neutral-50 border-none rounded-2xl px-5 py-3 outline-none focus:ring-2 focus:ring-[#F7D634]/50 transition-all font-medium text-black placeholder:text-neutral-400"
                     />
                   </div>
                 </div>
@@ -390,7 +480,7 @@ export default function BudgetModal({ isOpen, onClose }) {
                     <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-[0.2em] ml-1">Nome Completo</label>
                     <div className="relative">
                       <UserIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
-                      <input type="text" name="nome" value={formData.nome} onChange={handleInputChange} required className="w-full pl-12 pr-4 py-4 bg-neutral-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-[#F7D634]/50 transition-all font-medium text-black placeholder:text-neutral-400" placeholder="Como deseja ser chamado?" />
+                      <input type="text" name="nome" value={formData.nome} onChange={handleNameChange} required className="w-full pl-12 pr-4 py-4 bg-neutral-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-[#F7D634]/50 transition-all font-medium text-black placeholder:text-neutral-400" placeholder="Como deseja ser chamado?" />
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -404,7 +494,7 @@ export default function BudgetModal({ isOpen, onClose }) {
                     <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-[0.2em] ml-1">WhatsApp</label>
                     <div className="relative">
                       <Message01Icon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
-                      <input type="tel" name="telefone" value={formData.telefone} onChange={handleInputChange} required className="w-full pl-12 pr-4 py-4 bg-neutral-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-[#F7D634]/50 transition-all font-medium text-black placeholder:text-neutral-400" placeholder="(00) 00000-0000" />
+                      <input type="tel" name="telefone" value={formData.telefone} onChange={handlePhoneChange} required className="w-full pl-12 pr-4 py-4 bg-neutral-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-[#F7D634]/50 transition-all font-medium text-black placeholder:text-neutral-400" placeholder="(00) 00000-0000" />
                     </div>
                   </div>
                 </div>
@@ -441,13 +531,34 @@ export default function BudgetModal({ isOpen, onClose }) {
                       placeholder="Ex: Quero uma cozinha com ilha central e espaço para embutir forno elétrico..."
                       className="w-full bg-neutral-50 border-none rounded-[32px] px-10 py-10 text-black text-[15px] outline-none focus:ring-2 focus:ring-[#F7D634]/50 transition-all min-h-[180px] resize-none placeholder:text-neutral-400 shadow-inner"
                     />
-                    <div className="px-4">
+
+                    <div className="px-4 space-y-3">
+                      <div className="flex flex-wrap gap-2">
+                        {formData.fotos.map((src, idx) => (
+                          <div key={idx} className="relative w-14 h-14 rounded-xl overflow-hidden border border-neutral-200 shadow-sm animate-fade-in">
+                            <img src={src} className="w-full h-full object-cover" />
+                            <button type="button" onClick={() => removePhoto(idx)} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full p-0.5 hover:bg-red-500 transition-colors"><Cancel01Icon size={10} /></button>
+                          </div>
+                        ))}
+                      </div>
+
+                      <label className="flex items-center gap-3 p-4 bg-[#F7D634]/5 border-2 border-dashed border-[#F7D634]/30 rounded-2xl cursor-pointer hover:bg-[#F7D634]/10 transition-all group">
+                        <input type="file" multiple accept="image/*" className="hidden" onChange={handleFileChange} />
+                        <div className="bg-[#F7D634] p-2 rounded-xl text-black shadow-sm group-hover:scale-110 transition-transform">
+                          <FileAttachmentIcon size={18} />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[13px] font-bold text-black">Anexar Fotos de Referência</span>
+                          <span className="text-[11px] text-neutral-500">Clique para selecionar arquivos do seu dispositivo</span>
+                        </div>
+                      </label>
+                      
                       <button 
                         type="button"
                         onClick={handleSendToBot}
-                        className="w-full py-4 bg-black text-white font-bold rounded-2xl hover:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                        className="w-full py-4 bg-black text-white font-bold rounded-2xl hover:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg"
                       >
-                        Enviar ideia <ArrowRight01Icon size={18} />
+                        Enviar orçamento e detalhes <ArrowRight01Icon size={18} />
                       </button>
                     </div>
                   </div>
@@ -489,11 +600,20 @@ export default function BudgetModal({ isOpen, onClose }) {
                 ) : <div />}
                 
                 {step === 1 ? null : step === 6 ? (
-                  <button type="submit" className="px-8 py-4 bg-black text-white text-[13px] font-bold rounded-2xl hover:scale-[0.98] transition-all shadow-lg flex items-center gap-2">
+                  <button 
+                    type="submit" 
+                    disabled={!isStepValid(6)}
+                    className="px-8 py-4 bg-black text-white text-[13px] font-bold rounded-2xl hover:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-lg flex items-center gap-2"
+                  >
                     Enviar Solicitação <ArrowRight01Icon size={18} />
                   </button>
                 ) : (
-                  <button type="button" onClick={nextStep} className="px-8 py-4 bg-black text-white text-[13px] font-bold rounded-2xl hover:scale-[0.98] transition-all shadow-lg flex items-center gap-2">
+                  <button 
+                    type="button" 
+                    onClick={nextStep}
+                    disabled={!isStepValid(step)}
+                    className="px-8 py-4 bg-black text-white text-[13px] font-bold rounded-2xl hover:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-lg flex items-center gap-2"
+                  >
                     Próximo Passo <ArrowRight01Icon size={18} />
                   </button>
                 )}
