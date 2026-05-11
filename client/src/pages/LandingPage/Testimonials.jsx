@@ -179,7 +179,7 @@ export default function Testimonials() {
   return (
     <section id="depoimentos" className="bg-neutral-950 text-white py-24 px-6 relative overflow-hidden flex flex-col items-center">
 
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-[#F7D634]/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-[#F7D634]/15 rounded-full blur-[120px] pointer-events-none" />
       
       <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-12 items-center z-10">
         
