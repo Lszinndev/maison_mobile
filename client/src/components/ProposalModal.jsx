@@ -94,7 +94,7 @@ Condições: ${formData.parcelamento || 'Sob consulta'}
       `}</style>
 
       <div className="flex w-full h-full">
-        
+
         {/* Left Side: Controls & Form */}
         <div className="w-[400px] border-r border-neutral-200 bg-[#F5F5F7] flex flex-col h-full shadow-2xl z-10 shrink-0 no-print">
           <header className="p-6 border-b border-neutral-200 bg-white flex justify-between items-center">
@@ -102,18 +102,18 @@ Condições: ${formData.parcelamento || 'Sob consulta'}
               <h2 className="text-lg font-bold text-black tracking-tight">Estúdio de Propostas</h2>
               <p className="text-xs text-neutral-500">Editando proposta para {lead.name}</p>
             </div>
-            <button onClick={onClose} className="p-2 text-neutral-400 hover:text-black transition-colors rounded-full hover:bg-neutral-100">
+            <button onClick={onClose} className="p-2 text-neutral-400 hover:text-black transition-colors rounded-full hover:bg-neutral-100 cursor-pointer">
               <Cancel01Icon size={20} />
             </button>
           </header>
 
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
             <div className="space-y-4">
-              <h3 className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest">Valores & Pagamento</h3>
-              
+              <h3 className="text-[11px] font-bold text-neutral-800 uppercase tracking-widest">Valores & Pagamento</h3>
+
               <div className="space-y-1.5">
                 <label className="text-[12px] font-semibold text-neutral-600">Valor Total (R$)</label>
-                <input 
+                <input
                   type="text" name="valorTotal" value={formData.valorTotal} onChange={handleInputChange}
                   placeholder="Ex: 15.500,00"
                   className="w-full p-3 rounded-xl border border-neutral-200 text-sm focus:ring-2 focus:ring-[#F7D634] outline-none"
@@ -121,8 +121,8 @@ Condições: ${formData.parcelamento || 'Sob consulta'}
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[12px] font-semibold text-neutral-600">Entrada / Sinal</label>
-                <input 
+                <label className="text-[12px] font-semibold text-neutral-800">Entrada / Sinal</label>
+                <input
                   type="text" name="sinal" value={formData.sinal} onChange={handleInputChange}
                   placeholder="Ex: 40% na assinatura"
                   className="w-full p-3 rounded-xl border border-neutral-200 text-sm focus:ring-2 focus:ring-[#F7D634] outline-none"
@@ -130,8 +130,8 @@ Condições: ${formData.parcelamento || 'Sob consulta'}
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[12px] font-semibold text-neutral-600">Condição Restante</label>
-                <input 
+                <label className="text-[12px] font-semibold text-neutral-800">Condição Restante</label>
+                <input
                   type="text" name="parcelamento" value={formData.parcelamento} onChange={handleInputChange}
                   placeholder="Ex: Saldo em até 6x no cartão"
                   className="w-full p-3 rounded-xl border border-neutral-200 text-sm focus:ring-2 focus:ring-[#F7D634] outline-none"
@@ -140,11 +140,11 @@ Condições: ${formData.parcelamento || 'Sob consulta'}
             </div>
 
             <div className="space-y-4 pt-4 border-t border-neutral-200">
-              <h3 className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest">Gerais</h3>
-              
+              <h3 className="text-[11px] font-bold text-neutral-800 uppercase tracking-widest">Gerais</h3>
+
               <div className="space-y-1.5">
-                <label className="text-[12px] font-semibold text-neutral-600">Validade da Proposta</label>
-                <input 
+                <label className="text-[12px] font-semibold text-neutral-800">Validade da Proposta</label>
+                <input
                   type="text" name="validade" value={formData.validade} onChange={handleInputChange}
                   placeholder="Ex: 15 dias"
                   className="w-full p-3 rounded-xl border border-neutral-200 text-sm focus:ring-2 focus:ring-[#F7D634] outline-none"
@@ -152,8 +152,8 @@ Condições: ${formData.parcelamento || 'Sob consulta'}
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[12px] font-semibold text-neutral-600">Observações Extras</label>
-                <textarea 
+                <label className="text-[12px] font-semibold text-neutral-800">Observações Extras</label>
+                <textarea
                   name="observacoesExtras" value={formData.observacoesExtras} onChange={handleInputChange}
                   placeholder="Itens que não estão inclusos, observações de montagem..."
                   className="w-full p-3 rounded-xl border border-neutral-200 text-sm focus:ring-2 focus:ring-[#F7D634] outline-none min-h-[100px] resize-none"
@@ -163,15 +163,15 @@ Condições: ${formData.parcelamento || 'Sob consulta'}
           </div>
 
           <div className="p-6 bg-white border-t border-neutral-200 space-y-3 no-print">
-            <button 
+            <button
               onClick={handlePrint}
-              className="w-full py-3.5 bg-black hover:bg-neutral-800 text-white font-bold text-sm rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg"
+              className="w-full py-3.5 bg-black hover:bg-neutral-800 text-white font-bold text-sm rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg cursor-pointer"
             >
               <FileAttachmentIcon size={18} /> Gerar PDF / Imprimir
             </button>
-            <button 
+            <button
               onClick={handleSendWhatsApp}
-              className="w-full py-3.5 bg-[#25D366] hover:bg-[#20ba57] text-white font-bold text-sm rounded-xl transition-all flex items-center justify-center gap-2 shadow-md"
+              className="w-full py-3.5 bg-[#25D366] hover:bg-[#20ba57] text-white font-bold text-sm rounded-xl transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer"
             >
               <ArrowRight01Icon size={18} /> Enviar no WhatsApp
             </button>
@@ -180,30 +180,30 @@ Condições: ${formData.parcelamento || 'Sob consulta'}
 
         {/* Right Side: PDF Live Preview Background */}
         <div className="flex-1 bg-[#f5f5f5] overflow-y-auto p-12 flex justify-center items-start print:p-0 print:bg-white">
-          
+
           {/* A4 Container (210mm x 297mm aspect ratio approx) */}
-          <div 
+          <div
             id="print-area"
             className="bg-[#ffffff] w-[210mm] min-h-[297mm] shadow-2xl relative shrink-0 flex flex-col"
           >
             {/* --- INÍCIO DO CONTEÚDO DO PDF --- */}
-            
+
             {/* Header (Top Yellow Bar + Logo) */}
             <div className="h-4 bg-[#F7D634] w-full absolute top-0 left-0" />
             <div className="px-10 pt-10 pb-6 flex justify-between items-start border-b border-[#f5f5f5]">
               <div>
-                <img 
-                  src={logoImg} 
-                  alt="Maison Mobile" 
-                  className="h-8 object-contain invert grayscale mb-2" 
+                <img
+                  src={logoImg}
+                  alt="Maison Mobile"
+                  className="h-8 object-contain invert grayscale mb-2"
                 />
                 <p className="text-[10px] text-[#a3a3a3] uppercase tracking-widest font-bold">Proposta Comercial</p>
                 <h1 className="text-3xl font-bold text-[#000000] tracking-tight mt-1">Projeto: {lead.budget.ambiente}</h1>
               </div>
               <div className="text-right space-y-1">
                 <p className="text-[12px] font-bold text-[#000000]">Maison Mobile</p>
-                <p className="text-[11px] text-[#737373]">contato@maison.com</p>
-                <p className="text-[11px] text-[#737373]">(41) 3000-0000</p>
+                {/* <p className="text-[11px] text-[#737373]">contato@maison.com</p> */}
+                <p className="text-[11px] text-[#737373]">(41) 99696-9634</p>
                 <p className="text-[11px] text-[#737373] mt-2">Data: {new Date().toLocaleDateString('pt-BR')}</p>
               </div>
             </div>
@@ -260,13 +260,13 @@ Condições: ${formData.parcelamento || 'Sob consulta'}
             {/* Financial Summary */}
             <div className="px-10 py-6 bg-[#F5F5F7]">
               <h2 className="text-[14px] font-bold text-[#000000] border-b border-[#e5e5e5] pb-1.5 mb-4">Resumo de Valores</h2>
-              
+
               <div className="space-y-4">
                 <div className="flex justify-between items-end">
                   <span className="text-[14px] font-semibold text-[#404040]">Investimento Total</span>
                   <span className="text-[24px] font-bold text-[#000000]">R$ {formData.valorTotal || '0,00'}</span>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4 pt-3 border-t border-[#e5e5e5]">
                   <div>
                     <p className="text-[10px] font-bold text-[#a3a3a3] uppercase tracking-widest mb-1">Entrada / Sinal</p>
@@ -286,7 +286,7 @@ Condições: ${formData.parcelamento || 'Sob consulta'}
                 <div className="text-[10px] text-[#737373] space-y-1.5 border border-[#e5e5e5] p-3 rounded-xl bg-[#fafafa]">
                   {formData.validade && <p><span className="font-bold text-[#000000]">Validade da proposta:</span> {formData.validade}</p>}
                   {formData.observacoesExtras && (
-                    <p className="whitespace-pre-wrap leading-snug"><span className="font-bold text-[#000000]">Observações da loja:</span><br/>{formData.observacoesExtras}</p>
+                    <p className="whitespace-pre-wrap leading-snug"><span className="font-bold text-[#000000]">Observações da loja:</span><br />{formData.observacoesExtras}</p>
                   )}
                 </div>
               )}
@@ -297,7 +297,7 @@ Condições: ${formData.parcelamento || 'Sob consulta'}
                 <p className="text-[10px] font-bold tracking-widest text-[#a3a3a3] uppercase mt-1">Assinatura do Cliente</p>
               </div>
             </div>
-            
+
             {/* --- FIM DO CONTEÚDO DO PDF --- */}
           </div>
         </div>

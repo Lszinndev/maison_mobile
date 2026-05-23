@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logoImg from '../../assets/logo.webp';
-import { 
-  Search01Icon, 
+import {
+  Search01Icon,
   Logout01Icon,
   Add01Icon,
   ArrowRight01Icon,
@@ -50,9 +50,6 @@ export default function Dashboard() {
       return;
     }
 
-    // Carregar leads do LocalStorage e combinar com os mocks iniciais
-    const savedLeads = JSON.parse(localStorage.getItem('leads') || '[]');
-    
     // Mocks iniciais mais completos para combinar com o novo layout
     const enhancedMocks = mockLeads.map(l => ({
       ...l,
@@ -65,15 +62,10 @@ export default function Dashboard() {
       }
     }));
 
-    const allLeads = [...savedLeads, ...enhancedMocks];
-    
-    // Garantir que não existam IDs duplicados (que causariam erro de seleção)
-    const uniqueLeads = Array.from(new Map(allLeads.map(l => [l.id, l])).values());
-    
-    setLeads(uniqueLeads);
-    
+    setLeads(enhancedMocks);
+
     // Selecionar o lead mais recente por padrão
-    if (uniqueLeads.length > 0) setSelectedLead(uniqueLeads[0]);
+    if (enhancedMocks.length > 0) setSelectedLead(enhancedMocks[0]);
   }, [navigate]);
 
   const handleLogout = () => {
@@ -102,13 +94,6 @@ export default function Dashboard() {
     setSelectedLead(editedLead);
     setIsEditing(false);
     setEditedLead(null);
-    
-    // Salvar no LocalStorage (opcional se quiser persistência imediata)
-    const storedLeads = JSON.parse(localStorage.getItem('leads') || '[]');
-    const newStoredLeads = storedLeads.map(l => l.id === editedLead.id ? editedLead : l);
-    // Se o lead editado for um mock, ele pode não estar no localStorage. 
-    // Para simplificar esse MVP, apenas atualizamos o estado local.
-    localStorage.setItem('leads', JSON.stringify(newStoredLeads));
   };
 
   const handleEditChange = (field, value, isBudgetField = false) => {
@@ -127,7 +112,7 @@ export default function Dashboard() {
     const matchesStatus = statusFilter === 'Todos' || l.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
-  
+
   // Lógica de Paginação
   const indexOfLastLead = currentPage * leadsPerPage;
   const indexOfFirstLead = indexOfLastLead - leadsPerPage;
@@ -138,14 +123,14 @@ export default function Dashboard() {
 
   return (
     <div className={`h-screen font-sans flex antialiased overflow-hidden selection:bg-[#F7D634] selection:text-black transition-colors duration-500 bg-[#F5F5F7] text-[#1D1D1F]`}>
-      
+
       {/* 1. Slim Sidebar */}
       <aside className={`w-16 lg:w-20 border-r flex flex-col items-center py-8 gap-10 shrink-0 transition-colors duration-500 bg-white border-neutral-200`}>
         <img src={logoImg} alt="M" className="h-5 w-auto" />
         <nav className="flex flex-col gap-8">
-          <SidebarIcon 
-            icon={<UserGroupIcon size={22}/>} 
-            active 
+          <SidebarIcon
+            icon={<UserGroupIcon size={22} />}
+            active
             badge={leads.filter(l => l.status === 'Novo').length}
           />
         </nav>
@@ -159,31 +144,30 @@ export default function Dashboard() {
 
       {/* 2. Middle Pane - List */}
       <section className="w-80 lg:w-96 border-r flex flex-col shrink-0 transition-colors duration-500 bg-[#F5F5F7] border-neutral-200">
-        <header className="p-6 space-y-6">
-          <div className="flex justify-between items-center">
+        <header className="px-3 pt-6 pb-4 space-y-6">
+          <div className="flex justify-between items-center px-1">
             <h1 className="text-xl font-bold tracking-tight">Leads</h1>
           </div>
           <div className="flex gap-2 items-center">
             <div className="relative group flex-1">
               <Search01Icon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 transition-colors text-neutral-400 group-focus-within:text-black" />
-              <input 
-                type="text" 
-                placeholder="Buscar..." 
+              <input
+                type="text"
+                placeholder="Buscar..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full border-none rounded-xl pl-10 pr-4 py-2.5 text-sm outline-none transition-all bg-white text-black placeholder:text-neutral-400 focus:ring-1 focus:ring-black/5"
               />
             </div>
-            
+
             {/* Botão de Filtro Único */}
             <div className="relative">
-              <button 
+              <button
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
-                className={`p-2.5 rounded-xl border transition-all flex items-center justify-center gap-2 ${
-                  isFilterOpen || statusFilter !== 'Todos'
-                    ? 'bg-[#F7D634] border-[#F7D634] text-black' 
-                    : 'bg-white border-neutral-200 text-neutral-400 hover:text-black'
-                }`}
+                className={`p-2.5 rounded-xl border transition-all flex items-center justify-center gap-2 ${isFilterOpen || statusFilter !== 'Todos'
+                  ? 'bg-[#F7D634] border-[#F7D634] text-black'
+                  : 'bg-white border-neutral-200 text-neutral-400 hover:text-black'
+                  }`}
               >
                 <Settings04Icon size={18} />
               </button>
@@ -202,19 +186,17 @@ export default function Dashboard() {
                             setStatusFilter(status);
                             setIsFilterOpen(false);
                           }}
-                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
-                            statusFilter === status 
-                              ? 'bg-black/5 text-black'
-                              : 'text-neutral-500 hover:bg-black/5 hover:text-black'
-                          }`}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all ${statusFilter === status
+                            ? 'bg-black/5 text-black'
+                            : 'text-neutral-500 hover:bg-black/5 hover:text-black'
+                            }`}
                         >
-                          <div className={`w-1.5 h-1.5 rounded-full ${
-                            status === 'Todos' ? 'bg-black/10' :
+                          <div className={`w-1.5 h-1.5 rounded-full ${status === 'Todos' ? 'bg-black/10' :
                             status === 'Novo' ? 'bg-[#0A84FF]' :
-                            status === 'Atendimento' ? 'bg-[#FF9F0A]' :
-                            status === 'Pendente' ? 'bg-[#FF3B30]' :
-                            'bg-[#30D158]'
-                          }`} />
+                              status === 'Atendimento' ? 'bg-[#FF9F0A]' :
+                                status === 'Pendente' ? 'bg-[#FF3B30]' :
+                                  'bg-[#30D158]'
+                            }`} />
                           {status}
                         </button>
                       ))}
@@ -228,17 +210,16 @@ export default function Dashboard() {
 
         <div className="flex-1 overflow-y-auto px-3 py-2 space-y-1 scrollbar-hide">
           {currentLeads.map((lead) => (
-            <div 
-              key={lead.id} 
+            <div
+              key={lead.id}
               onClick={() => {
                 setSelectedLead(lead);
                 setIsEditing(false);
               }}
-              className={`p-4 rounded-2xl cursor-pointer transition-all duration-300 relative ${
-                selectedLead?.id === lead.id 
-                  ? 'bg-white ring-1 ring-black/5 z-10'
-                  : 'hover:bg-black/5 text-neutral-600'
-              }`}
+              className={`p-4 rounded-2xl cursor-pointer transition-all duration-300 relative ${selectedLead?.id === lead.id
+                ? 'bg-white ring-1 ring-black/5 z-10'
+                : 'hover:bg-black/5 text-neutral-600'
+                }`}
             >
               <div className="flex justify-between items-start mb-1">
                 <span className={`text-[15px] font-semibold tracking-tight ${selectedLead?.id === lead.id ? 'text-black' : ''}`}>{lead.name}</span>
@@ -246,12 +227,11 @@ export default function Dashboard() {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-[12px] text-zinc-500 truncate max-w-[160px]">{lead.email}</span>
-                <div className={`w-1.5 h-1.5 rounded-full ${
-                  lead.status === 'Novo' ? 'bg-[#0A84FF] animate-pulse ring-4 ring-[#0A84FF]/20' : 
-                  lead.status === 'Atendimento' ? 'bg-[#FF9F0A]' : 
-                  lead.status === 'Pendente' ? 'bg-[#FF3B30]' : 
-                  'bg-[#30D158]'
-                }`} />
+                <div className={`w-1.5 h-1.5 rounded-full ${lead.status === 'Novo' ? 'bg-[#0A84FF] animate-pulse ring-4 ring-[#0A84FF]/20' :
+                  lead.status === 'Atendimento' ? 'bg-[#FF9F0A]' :
+                    lead.status === 'Pendente' ? 'bg-[#FF3B30]' :
+                      'bg-[#30D158]'
+                  }`} />
               </div>
             </div>
           ))}
@@ -260,7 +240,7 @@ export default function Dashboard() {
         {/* Pagination Controls */}
         {totalPages > 1 && (
           <div className="p-4 border-t flex justify-between items-center border-neutral-200">
-            <button 
+            <button
               disabled={currentPage === 1}
               onClick={() => paginate(currentPage - 1)}
               className="text-[11px] font-bold uppercase tracking-wider disabled:opacity-20 hover:text-[#F7D634] transition-colors"
@@ -270,7 +250,7 @@ export default function Dashboard() {
             <div className="flex gap-2">
               <span className="text-[11px] font-bold opacity-40">{currentPage} / {totalPages}</span>
             </div>
-            <button 
+            <button
               disabled={currentPage === totalPages}
               onClick={() => paginate(currentPage + 1)}
               className="text-[11px] font-bold uppercase tracking-wider disabled:opacity-20 hover:text-[#F7D634] transition-colors"
@@ -301,30 +281,30 @@ export default function Dashboard() {
               <div className="flex gap-3">
                 {isEditing ? (
                   <>
-                    <button 
+                    <button
                       onClick={handleCancelEdit}
-                      className="px-6 py-2.5 text-[13px] font-bold rounded-xl border transition-all bg-white text-black border-neutral-200 hover:bg-neutral-50"
+                      className="px-6 py-2.5 text-[13px] font-bold rounded-xl border transition-all bg-white text-black border-neutral-200 hover:bg-neutral-50 cursor-pointer"
                     >
                       Cancelar
                     </button>
-                    <button 
+                    <button
                       onClick={handleSaveEdit}
-                      className="px-6 py-2.5 text-[13px] font-bold rounded-xl transition-all bg-black text-white hover:bg-neutral-800"
+                      className="px-6 py-2.5 text-[13px] font-bold rounded-xl transition-all bg-black text-white hover:bg-neutral-800 cursor-pointer"
                     >
                       Salvar Alterações
                     </button>
                   </>
                 ) : (
                   <>
-                    <button 
+                    <button
                       onClick={handleStartEdit}
-                      className="px-6 py-2.5 text-[13px] font-bold rounded-xl border transition-all bg-white text-black border-neutral-200 hover:bg-neutral-50"
+                      className="px-6 py-2.5 text-[13px] font-bold rounded-xl border transition-all bg-white text-black border-neutral-200 hover:bg-neutral-50 cursor-pointer"
                     >
                       Editar
                     </button>
-                    <button 
+                    <button
                       onClick={() => setIsProposalModalOpen(true)}
-                      className="px-6 py-2.5 text-[13px] font-bold rounded-xl transition-all bg-black text-white hover:bg-neutral-800"
+                      className="px-6 py-2.5 text-[13px] font-bold rounded-xl transition-all bg-black text-white hover:bg-neutral-800 cursor-pointer"
                     >
                       Gerar Proposta
                     </button>
@@ -336,50 +316,50 @@ export default function Dashboard() {
             {/* Body */}
             <div className="flex-1 overflow-y-auto p-12 lg:p-16 space-y-16 scrollbar-hide">
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-12 gap-x-8">
-                <DetailBox 
-                  label="Ambiente" 
-                  value={isEditing ? editedLead.budget.ambiente : selectedLead.budget.ambiente} 
+                <DetailBox
+                  label="Ambiente"
+                  value={isEditing ? editedLead.budget.ambiente : selectedLead.budget.ambiente}
                   isEditing={isEditing}
                   onChange={(val) => handleEditChange('ambiente', val, true)}
                 />
-                <DetailBox 
-                  label="Acabamento" 
-                  value={isEditing ? editedLead.budget.mdf : selectedLead.budget.mdf} 
+                <DetailBox
+                  label="Acabamento"
+                  value={isEditing ? editedLead.budget.mdf : selectedLead.budget.mdf}
                   isEditing={isEditing}
                   onChange={(val) => handleEditChange('mdf', val, true)}
                 />
-                <DetailBox 
-                  label="Estilo" 
-                  value={isEditing ? editedLead.budget.estilo : selectedLead.budget.estilo} 
+                <DetailBox
+                  label="Estilo"
+                  value={isEditing ? editedLead.budget.estilo : selectedLead.budget.estilo}
                   isEditing={isEditing}
                   onChange={(val) => handleEditChange('estilo', val, true)}
                 />
-                <DetailBox 
-                  label="Recebido" 
-                  value={selectedLead.date} 
+                <DetailBox
+                  label="Recebido"
+                  value={selectedLead.date}
                 />
-                
-                <DetailBox 
-                  label="Ferragens" 
-                  value={isEditing ? (editedLead.budget.ferragens || '') : (selectedLead.budget.ferragens || 'N/A')} 
+
+                <DetailBox
+                  label="Ferragens"
+                  value={isEditing ? (editedLead.budget.ferragens || '') : (selectedLead.budget.ferragens || 'N/A')}
                   isEditing={isEditing}
                   onChange={(val) => handleEditChange('ferragens', val, true)}
                 />
-                <DetailBox 
-                  label="Puxadores" 
-                  value={isEditing ? (editedLead.budget.puxadores || '') : (selectedLead.budget.puxadores || 'N/A')} 
+                <DetailBox
+                  label="Puxadores"
+                  value={isEditing ? (editedLead.budget.puxadores || '') : (selectedLead.budget.puxadores || 'N/A')}
                   isEditing={isEditing}
                   onChange={(val) => handleEditChange('puxadores', val, true)}
                 />
-                <DetailBox 
-                  label="Medidas" 
-                  value={isEditing ? (editedLead.budget.medidas || '') : (selectedLead.budget.medidas || 'N/A')} 
+                <DetailBox
+                  label="Medidas"
+                  value={isEditing ? (editedLead.budget.medidas || '') : (selectedLead.budget.medidas || 'N/A')}
                   isEditing={isEditing}
                   onChange={(val) => handleEditChange('medidas', val, true)}
                 />
-                <DetailBox 
-                  label="WhatsApp" 
-                  value={isEditing ? (editedLead.budget.whatsapp || '') : (selectedLead.budget.whatsapp || 'N/A')} 
+                <DetailBox
+                  label="WhatsApp"
+                  value={isEditing ? (editedLead.budget.whatsapp || '') : (selectedLead.budget.whatsapp || 'N/A')}
                   isEditing={isEditing}
                   onChange={(val) => handleEditChange('whatsapp', val, true)}
                 />
@@ -407,7 +387,7 @@ export default function Dashboard() {
                   <h3 className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Observações do projeto</h3>
                 </div>
                 {isEditing ? (
-                  <textarea 
+                  <textarea
                     value={editedLead.budget.descricao}
                     onChange={(e) => handleEditChange('descricao', e.target.value, true)}
                     className="w-full p-4 rounded-2xl border border-neutral-200 text-[18px] font-medium focus:ring-2 focus:ring-[#F7D634] outline-none min-h-[150px] resize-none"
@@ -427,8 +407,8 @@ export default function Dashboard() {
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                     {selectedLead.budget.fotos.map((foto, idx) => (
-                      <div 
-                        key={idx} 
+                      <div
+                        key={idx}
                         onClick={() => setViewingPhoto(foto)}
                         className="group relative aspect-square rounded-2xl overflow-hidden border border-neutral-200 shadow-sm cursor-pointer hover:shadow-md transition-all bg-neutral-50"
                       >
@@ -444,13 +424,13 @@ export default function Dashboard() {
 
               {/* Actions */}
               <section className="space-y-6 pt-16 border-t border-neutral-100">
-                 <h3 className="text-[11px] font-bold text-zinc-600 uppercase tracking-[0.2em]">Gestão de Status</h3>
-                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                   <StatusButton label="Novo Lead" active={selectedLead.status === 'Novo'} onClick={() => handleStatusChange(selectedLead.id, 'Novo')} color="#0A84FF" />
-                   <StatusButton label="Em Atendimento" active={selectedLead.status === 'Atendimento'} onClick={() => handleStatusChange(selectedLead.id, 'Atendimento')} color="#FF9F0A" />
-                   <StatusButton label="Pendente" active={selectedLead.status === 'Pendente'} onClick={() => handleStatusChange(selectedLead.id, 'Pendente')} color="#FF3B30" />
-                   <StatusButton label="Finalizado" active={selectedLead.status === 'Finalizado'} icon={<Tick01Icon size={18}/>} onClick={() => handleStatusChange(selectedLead.id, 'Finalizado')} color="#30D158" />
-                 </div>
+                <h3 className="text-[11px] font-bold text-zinc-600 uppercase tracking-[0.2em]">Gestão de Status</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <StatusButton label="Novo Lead" active={selectedLead.status === 'Novo'} onClick={() => handleStatusChange(selectedLead.id, 'Novo')} color="#0A84FF" className="cursor-pointer" />
+                  <StatusButton label="Em Atendimento" active={selectedLead.status === 'Atendimento'} onClick={() => handleStatusChange(selectedLead.id, 'Atendimento')} color="#FF9F0A" className="cursor-pointer" />
+                  <StatusButton label="Pendente" active={selectedLead.status === 'Pendente'} onClick={() => handleStatusChange(selectedLead.id, 'Pendente')} color="#FF3B30" className="cursor-pointer" />
+                  <StatusButton label="Finalizado" active={selectedLead.status === 'Finalizado'} icon={<Tick01Icon size={18} />} onClick={() => handleStatusChange(selectedLead.id, 'Finalizado')} color="#30D158" className="cursor-pointer" />
+                </div>
               </section>
             </div>
           </div>
@@ -463,25 +443,25 @@ export default function Dashboard() {
       </main>
 
       {/* Modals */}
-      <ProposalModal 
-        isOpen={isProposalModalOpen} 
-        onClose={() => setIsProposalModalOpen(false)} 
-        lead={selectedLead} 
+      <ProposalModal
+        isOpen={isProposalModalOpen}
+        onClose={() => setIsProposalModalOpen(false)}
+        lead={selectedLead}
       />
 
       {/* Lightbox Modal */}
       {viewingPhoto && (
-        <div 
+        <div
           className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-sm flex items-center justify-center p-10 animate-fade-in"
           onClick={() => setViewingPhoto(null)}
         >
           <button className="absolute top-10 right-10 text-white/50 hover:text-white transition-colors">
             <Cancel01Icon size={32} />
           </button>
-          <img 
-            src={viewingPhoto} 
-            className="max-w-full max-h-full object-contain shadow-2xl rounded-lg animate-scale-in" 
-            alt="Reference" 
+          <img
+            src={viewingPhoto}
+            className="max-w-full max-h-full object-contain shadow-2xl rounded-lg animate-scale-in"
+            alt="Reference"
             onClick={(e) => e.stopPropagation()}
           />
         </div>
@@ -492,13 +472,12 @@ export default function Dashboard() {
 
 function FilterPill({ label, active, onClick, color }) {
   return (
-    <button 
+    <button
       onClick={onClick}
-      className={`px-4 py-1.5 rounded-full text-[11px] font-bold transition-all whitespace-nowrap flex items-center gap-2 ${
-        active 
-          ? 'bg-[#F7D634] text-black' 
-          : 'bg-white border border-neutral-200 text-neutral-500 hover:text-black'
-      }`}
+      className={`px-4 py-1.5 rounded-full text-[11px] font-bold transition-all whitespace-nowrap flex items-center gap-2 ${active
+        ? 'bg-[#F7D634] text-black'
+        : 'bg-white border border-neutral-200 text-neutral-500 hover:text-black'
+        }`}
     >
       {color && <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} />}
       {label}
@@ -508,11 +487,10 @@ function FilterPill({ label, active, onClick, color }) {
 
 function SidebarIcon({ icon, active = false, badge = 0 }) {
   return (
-    <div className={`p-3 rounded-2xl transition-all cursor-pointer relative ${
-      active 
-        ? 'bg-[#F7D634] text-black' 
-        : 'text-neutral-300 hover:text-black hover:bg-black/5'
-    }`}>
+    <div className={`p-3 rounded-2xl transition-all cursor-pointer relative ${active
+      ? 'bg-[#F7D634] text-black'
+      : 'text-neutral-300 hover:text-black hover:bg-black/5'
+      }`}>
       {icon}
       {badge > 0 && (
         <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#FF3B30] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-inherit shadow-lg">
@@ -542,9 +520,9 @@ function DetailBox({ label, value, isEditing = false, onChange }) {
     <div className="space-y-2">
       <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">{label}</p>
       {isEditing && onChange ? (
-        <input 
-          type="text" 
-          value={value} 
+        <input
+          type="text"
+          value={value}
           onChange={(e) => onChange(e.target.value)}
           className="w-full p-2 -ml-2 rounded-lg border-neutral-200 text-[18px] font-bold tracking-tight text-black focus:ring-1 focus:ring-[#F7D634] outline-none bg-black/5 border"
         />
@@ -557,13 +535,12 @@ function DetailBox({ label, value, isEditing = false, onChange }) {
 
 function StatusButton({ label, active, onClick, color, icon }) {
   return (
-    <button 
+    <button
       onClick={onClick}
-      className={`flex items-center justify-between p-5 rounded-2xl border transition-all ${
-        active 
-          ? 'bg-black/5 border-black/10 text-black' 
-          : 'bg-white border-neutral-200 text-neutral-500 hover:border-black/10 hover:text-black'
-      }`}
+      className={`flex items-center justify-between p-5 rounded-2xl border transition-all cursor-pointer ${active
+        ? 'bg-black/5 border-black/10 text-black'
+        : 'bg-white border-neutral-200 text-neutral-500 hover:border-black/10 hover:text-black'
+        }`}
     >
       <div className="flex items-center gap-3">
         <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />

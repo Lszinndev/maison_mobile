@@ -11,7 +11,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  
+
   const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
   const [forgotStep, setForgotStep] = useState(1);
   const [forgotEmail, setForgotEmail] = useState('');
@@ -45,7 +45,7 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center p-6 bg-[#050505] font-sans selection:bg-[#F7D634] selection:text-black">
       {/* Background with Depth */}
       <div className="absolute inset-0 overflow-hidden">
-        <div 
+        <div
           className="absolute inset-0 opacity-[0.05] grayscale"
           style={{ backgroundImage: `url(${bgImg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
         />
@@ -64,7 +64,7 @@ export default function Login() {
         <div className="bg-white border border-neutral-200 rounded-[32px] p-8 md:p-10 shadow-2xl shadow-black/50">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-xs font-semibold text-neutral-400 ml-1">E-mail</label>
+              <label className="text-xs font-semibold text-neutral-800 ml-1">E-mail</label>
               <div className="relative group">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-300 group-focus-within:text-[#F7D634] transition-colors">
                   <Mail01Icon size={20} />
@@ -82,11 +82,11 @@ export default function Login() {
 
             <div className="space-y-2">
               <div className="flex justify-between items-center ml-1">
-                <label className="text-xs font-semibold text-neutral-400">Senha</label>
-                <button 
+                <label className="text-xs font-semibold text-neutral-800">Senha</label>
+                <button
                   type="button"
                   onClick={() => { setIsForgotModalOpen(true); setForgotEmail(email); }}
-                  className="text-xs text-[#F7D634] font-bold hover:underline transition-all"
+                  className="text-xs text-[#F7D634] font-bold hover:underline transition-all cursor-pointer"
                 >
                   Esqueceu a senha?
                 </button>
@@ -121,7 +121,7 @@ export default function Login() {
                 onChange={(e) => setRememberMe(e.target.checked)}
                 className="w-4 h-4 rounded border-neutral-200 bg-neutral-50 text-[#F7D634] focus:ring-0 cursor-pointer accent-[#F7D634]"
               />
-              <label htmlFor="remember" className="text-xs text-neutral-500 cursor-pointer select-none">
+              <label htmlFor="remember" className="text-xs text-neutral-800 cursor-pointer select-none">
                 Manter conectado
               </label>
             </div>
@@ -160,7 +160,7 @@ export default function Login() {
       {isForgotModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm animate-fade-in">
           <div className="relative bg-white border border-neutral-200 w-full max-w-[400px] rounded-[32px] p-8 shadow-2xl animate-fade-up">
-            <button 
+            <button
               onClick={() => { setIsForgotModalOpen(false); setForgotStep(1); }}
               className="absolute top-6 right-6 text-neutral-300 hover:text-black"
             >
@@ -173,7 +173,7 @@ export default function Login() {
                   <h2 className="text-xl font-bold text-black">Recuperar acesso</h2>
                   <p className="text-neutral-500 text-sm mt-1">Informe seu e-mail cadastrado para prosseguir.</p>
                 </div>
-                
+
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-neutral-400">Seu e-mail</label>
                   <input
@@ -200,7 +200,7 @@ export default function Login() {
                 <div>
                   <h2 className="text-xl font-bold text-black">E-mail enviado</h2>
                   <p className="text-neutral-500 text-sm mt-1">
-                    Verifique sua caixa de entrada:<br/>
+                    Verifique sua caixa de entrada:<br />
                     <span className="text-neutral-800 mt-2 block font-medium">{maskEmail(forgotEmail)}</span>
                   </p>
                 </div>

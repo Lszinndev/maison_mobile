@@ -38,23 +38,25 @@ import cozinhaImg from '../assets/467670809_18249282280278373_402318189326740578
 import quartoImg from '../assets/quarto.webp';
 import banheiroImg from '../assets/banheiro.webp';
 
+const initialFormState = {
+  ambiente: '',
+  largura: '',
+  altura: '',
+  estilo: '',
+  mdf: '',
+  marcaFerragem: '',
+  acessorios: [],
+  puxadores: '',
+  nome: '',
+  email: '',
+  telefone: '',
+  descricao: '',
+  fotos: []
+};
+
 export default function BudgetModal({ isOpen, onClose }) {
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
-    ambiente: '',
-    largura: '',
-    altura: '',
-    estilo: '',
-    mdf: '',
-    marcaFerragem: '',
-    acessorios: [],
-    puxadores: '',
-    nome: '',
-    email: '',
-    telefone: '',
-    descricao: '',
-    fotos: []
-  });
+  const [formData, setFormData] = useState(initialFormState);
 
   const [isChatFinished, setIsChatFinished] = useState(false);
   const [isBotTyping, setIsBotTyping] = useState(false);
@@ -65,6 +67,9 @@ export default function BudgetModal({ isOpen, onClose }) {
     } else {
       document.body.style.overflow = 'unset';
       setStep(1);
+      setFormData(initialFormState);
+      setIsChatFinished(false);
+      setIsBotTyping(false);
     }
     return () => {
       document.body.style.overflow = 'unset';
@@ -80,6 +85,11 @@ export default function BudgetModal({ isOpen, onClose }) {
   };
   const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
 
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
   const isStepValid = (stepNum) => {
     switch (stepNum) {
       case 1: return formData.ambiente !== '';
@@ -87,20 +97,20 @@ export default function BudgetModal({ isOpen, onClose }) {
       case 3: return formData.mdf !== '' && formData.marcaFerragem !== '';
       case 4: return true; // Acessórios são opcionais
       case 5: return formData.puxadores !== '';
-      case 6: return formData.nome !== '' && formData.email !== '' && formData.telefone !== '';
+      case 6: return formData.nome.trim() !== '' && validateEmail(formData.email) && formData.telefone.trim() !== '';
       default: return true;
     }
   };
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
-    
+
     files.forEach(file => {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setFormData(prev => ({ 
-          ...prev, 
-          fotos: [...prev.fotos, reader.result] 
+        setFormData(prev => ({
+          ...prev,
+          fotos: [...prev.fotos, reader.result]
         }));
       };
       reader.readAsDataURL(file);
@@ -121,22 +131,42 @@ export default function BudgetModal({ isOpen, onClose }) {
 
   const handleNumericChange = (e) => {
     const { name, value } = e.target;
-    // Remove tudo que não é número ou ponto
-    let val = value.replace(/[^0-9.]/g, '');
-    
-    // Garante que só exista um ponto decimal
-    const parts = val.split('.');
-    if (parts.length > 2) {
-      val = parts[0] + '.' + parts.slice(1).join('');
+
+    // Remove tudo que não for dígito
+    const clean = value.replace(/\D/g, '');
+
+    // Se estiver vazio ou for zero, limpa o campo
+    const parsed = parseInt(clean, 10);
+    if (isNaN(parsed) || parsed === 0) {
+      setFormData({ ...formData, [name]: '' });
+      return;
     }
 
-    setFormData({ ...formData, [name]: val });
+    // Converte para decimal (dividindo por 100)
+    const num = parsed / 100;
+
+    // Se o valor resultante for maior que 10.00 metros, bloqueia a inserção (ignora o input)
+    if (num > 10) {
+      return;
+    }
+
+    setFormData({ ...formData, [name]: num.toFixed(2) });
+  };
+
+  const handleNumericBlur = (e) => {
+    const { name, value } = e.target;
+    if (!value) return;
+    const num = parseFloat(value);
+    if (!isNaN(num)) {
+      const formatted = Math.min(num, 10).toFixed(2);
+      setFormData(prev => ({ ...prev, [name]: formatted }));
+    }
   };
 
   const handlePhoneChange = (e) => {
     let val = e.target.value.replace(/\D/g, '');
     if (val.length > 11) val = val.slice(0, 11);
-    
+
     if (val.length > 7) {
       val = `(${val.slice(0, 2)}) ${val.slice(2, 7)}-${val.slice(7)}`;
     } else if (val.length > 2) {
@@ -167,9 +197,9 @@ export default function BudgetModal({ isOpen, onClose }) {
 
   const handleSendToBot = () => {
     if (!formData.descricao.trim()) return;
-    
+
     setIsBotTyping(true);
-    
+
     // Simular o lead sendo salvo após a mensagem do usuário
     setTimeout(() => {
       const newLead = {
@@ -192,22 +222,8 @@ export default function BudgetModal({ isOpen, onClose }) {
         }
       };
 
-      try {
-        const existingLeads = JSON.parse(localStorage.getItem('leads') || '[]');
-        localStorage.setItem('leads', JSON.stringify([newLead, ...existingLeads]));
-      } catch (error) {
-        console.error('Erro ao salvar no localStorage:', error);
-        // Fallback: Tenta salvar sem as fotos se o limite for atingido
-        try {
-          const simplifiedLead = { ...newLead, budget: { ...newLead.budget, fotos: [] } };
-          const existingLeads = JSON.parse(localStorage.getItem('leads') || '[]');
-          localStorage.setItem('leads', JSON.stringify([simplifiedLead, ...existingLeads]));
-          alert("Aviso: O orçamento foi enviado, mas as fotos eram muito grandes para serem salvas localmente.");
-        } catch (e) {
-          console.error('Erro crítico no localStorage:', e);
-        }
-      }
-      
+
+
       setIsBotTyping(false);
       setIsChatFinished(true);
     }, 1500);
@@ -250,11 +266,10 @@ export default function BudgetModal({ isOpen, onClose }) {
             key={opt.name}
             type="button"
             onClick={() => handleAcessorioToggle(opt.name)}
-            className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${
-              formData.acessorios.includes(opt.name)
-                ? 'bg-[#F7D634]/10 border-[#F7D634] text-black shadow-sm'
-                : 'bg-white border-neutral-100 text-neutral-500 hover:border-neutral-300'
-            }`}
+            className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${formData.acessorios.includes(opt.name)
+              ? 'bg-[#F7D634]/10 border-[#F7D634] text-black shadow-sm'
+              : 'bg-white border-neutral-100 text-neutral-800 hover:border-neutral-300 cursor-pointer'
+              }`}
           >
             <div className="flex items-center gap-3">
               <span className={formData.acessorios.includes(opt.name) ? 'text-[#F7D634]' : 'text-neutral-400'}>{opt.icon}</span>
@@ -270,17 +285,17 @@ export default function BudgetModal({ isOpen, onClose }) {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-xl animate-fade-in">
       <div className="bg-white w-full max-w-2xl max-h-[95vh] rounded-[32px] shadow-2xl relative animate-fade-up overflow-hidden flex flex-col">
-        
+
         {/* Progress Header */}
         <div className="absolute top-0 left-0 w-full h-1.5 bg-neutral-100 overflow-hidden">
-          <div 
-            className="h-full bg-[#F7D634] transition-all duration-500 ease-out" 
+          <div
+            className="h-full bg-[#F7D634] transition-all duration-500 ease-out"
             style={{ width: `${(step / 6) * 100}%` }}
           />
         </div>
 
         {/* Close Button */}
-        <button onClick={onClose} className="absolute top-6 right-6 text-neutral-400 hover:text-black transition-all z-20">
+        <button onClick={onClose} className="absolute top-6 right-6 text-neutral-400 hover:text-black transition-all z-20 cursor-pointer">
           <Cancel01Icon size={24} />
         </button>
 
@@ -293,31 +308,30 @@ export default function BudgetModal({ isOpen, onClose }) {
           )}
 
           <form onSubmit={handleSubmit} className="flex flex-col h-full">
-            
+
             {/* STEP 1: AMBIENTE */}
             {step === 1 && (
               <div className="space-y-8 animate-fade-in">
                 <div className="space-y-2">
                   <h2 className="text-3xl font-bold tracking-tight">Qual ambiente deseja mobiliar?</h2>
-                  <p className="text-neutral-500">Selecione o espaço para começarmos o seu orçamento personalizado.</p>
+                  <p className="text-neutral-800">Selecione o espaço para começarmos o seu orçamento personalizado.</p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   {[
-                    { id: 'Cozinha', name: 'Cozinha', img: cozinhaImg, icon: <ChefHatIcon size={28}/> },
-                    { id: 'Closet', name: 'Closet', img: quartoImg, icon: <BedIcon size={28}/> },
-                    { id: 'Banheiro', name: 'B.W.C. / Banheiro', img: banheiroImg, icon: <Toilet01Icon size={28}/> },
-                    { id: 'Lavanderia', name: 'Lavanderia', img: banheiroImg, icon: <WashingMachineIcon size={28}/> }
+                    { id: 'Cozinha', name: 'Cozinha', img: cozinhaImg, icon: <ChefHatIcon size={28} /> },
+                    { id: 'Closet', name: 'Closet', img: quartoImg, icon: <BedIcon size={28} /> },
+                    { id: 'Banheiro', name: 'B.W.C. / Banheiro', img: banheiroImg, icon: <Toilet01Icon size={28} /> },
+                    { id: 'Lavanderia', name: 'Lavanderia', img: banheiroImg, icon: <WashingMachineIcon size={28} /> }
                   ].map((amb) => (
                     <button
                       key={amb.id}
                       type="button"
-                      onClick={() => { 
-                        setFormData({ ...formData, ambiente: amb.id }); 
-                        setStep(2); 
+                      onClick={() => {
+                        setFormData({ ...formData, ambiente: amb.id });
+                        setStep(2);
                       }}
-                      className={`group relative h-40 rounded-3xl overflow-hidden border-2 transition-all ${
-                        formData.ambiente === amb.id ? 'border-[#F7D634]' : 'border-transparent hover:scale-[1.02]'
-                      }`}
+                      className={`group relative h-40 rounded-3xl overflow-hidden border-2 transition-all ${formData.ambiente === amb.id ? 'border-[#F7D634]' : 'border-transparent hover:scale-[1.02] cursor-pointer'
+                        }`}
                     >
                       <img src={amb.img} className="absolute inset-0 w-full h-full object-cover brightness-[0.4] group-hover:brightness-[0.6] transition-all" />
                       <div className="absolute inset-0 flex flex-col justify-end p-5 text-white text-left">
@@ -337,41 +351,40 @@ export default function BudgetModal({ isOpen, onClose }) {
               <div className="space-y-8 animate-fade-in">
                 <div className="space-y-1">
                   <h2 className="text-2xl font-bold tracking-tight">Medidas & Estilo</h2>
-                  <p className="text-sm text-neutral-500">Defina o tamanho aproximado e a estética do seu móvel.</p>
+                  <p className="text-sm text-neutral-800">Defina o tamanho aproximado e a estética do seu móvel.</p>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-8">
                   <div className="space-y-3">
-                    <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest flex items-center gap-2">
+                    <label className="text-[11px] font-bold text-neutral-800 uppercase tracking-widest flex items-center gap-2">
                       <RulerIcon size={14} /> Largura (m)
                     </label>
-                    <input 
-                      type="text" name="largura" value={formData.largura} onChange={handleNumericChange}
+                    <input
+                      type="text" name="largura" value={formData.largura} onChange={handleNumericChange} onBlur={handleNumericBlur}
                       placeholder="Ex: 2.50" className="w-full bg-neutral-50 border-none rounded-2xl px-5 py-3 outline-none focus:ring-2 focus:ring-[#F7D634]/50 transition-all font-medium text-black placeholder:text-neutral-400"
                     />
                   </div>
                   <div className="space-y-3">
-                    <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest flex items-center gap-2">
+                    <label className="text-[11px] font-bold text-neutral-800 uppercase tracking-widest flex items-center gap-2">
                       <RulerIcon size={14} className="rotate-90" /> Altura (m)
                     </label>
-                    <input 
-                      type="text" name="altura" value={formData.altura} onChange={handleNumericChange}
+                    <input
+                      type="text" name="altura" value={formData.altura} onChange={handleNumericChange} onBlur={handleNumericBlur}
                       placeholder="Ex: 2.70" className="w-full bg-neutral-50 border-none rounded-2xl px-5 py-3 outline-none focus:ring-2 focus:ring-[#F7D634]/50 transition-all font-medium text-black placeholder:text-neutral-400"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest flex items-center gap-2">
+                  <label className="text-[11px] font-bold text-neutral-800 uppercase tracking-widest flex items-center gap-2">
                     <MagicWand01Icon size={14} /> Estética do Projeto
                   </label>
                   <div className="grid grid-cols-2 gap-3">
                     {['Liso', 'Provençal', 'Com Palhinha', 'Industrial'].map(style => (
                       <button
                         key={style} type="button" onClick={() => setFormData({ ...formData, estilo: style })}
-                        className={`p-4 rounded-2xl border text-left transition-all ${
-                          formData.estilo === style ? 'bg-black text-white border-black' : 'bg-white border-neutral-100 text-neutral-500 hover:border-neutral-300'
-                        }`}
+                        className={`p-4 rounded-2xl border text-left transition-all ${formData.estilo === style ? 'bg-black text-white border-black' : 'bg-white border-neutral-100 text-neutral-500 hover:border-neutral-300 cursor-pointer'
+                          }`}
                       >
                         <span className="text-[14px] font-semibold">{style}</span>
                       </button>
@@ -386,20 +399,19 @@ export default function BudgetModal({ isOpen, onClose }) {
               <div className="space-y-12 animate-fade-in">
                 <div className="space-y-2">
                   <h2 className="text-3xl font-bold tracking-tight">Materiais & Marcas</h2>
-                  <p className="text-neutral-500">A qualidade Maison Mobile começa na escolha dos materiais.</p>
+                  <p className="text-neutral-800">A qualidade Maison Mobile começa na escolha dos materiais.</p>
                 </div>
 
                 <div className="space-y-4">
-                  <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest flex items-center gap-2">
+                  <label className="text-[11px] font-bold text-neutral-800 uppercase tracking-widest flex items-center gap-2">
                     <PaintBucketIcon size={14} /> Acabamento
                   </label>
                   <div className="grid grid-cols-2 gap-3">
                     {['MDF Melamínico', 'Laca', 'Lâmina Natural', 'Metal/Fórmica'].map(mat => (
                       <button
                         key={mat} type="button" onClick={() => setFormData({ ...formData, mdf: mat })}
-                        className={`p-4 rounded-2xl border text-left transition-all ${
-                          formData.mdf === mat ? 'bg-black text-white border-black' : 'bg-white border-neutral-100 text-neutral-500 hover:border-neutral-300'
-                        }`}
+                        className={`p-4 rounded-2xl border text-left transition-all ${formData.mdf === mat ? 'bg-black text-white border-black' : 'bg-white border-neutral-100 text-neutral-500 hover:border-neutral-300 cursor-pointer'
+                          }`}
                       >
                         <span className="text-[14px] font-semibold">{mat}</span>
                       </button>
@@ -408,16 +420,15 @@ export default function BudgetModal({ isOpen, onClose }) {
                 </div>
 
                 <div className="space-y-4">
-                  <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest flex items-center gap-2">
+                  <label className="text-[11px] font-bold text-neutral-800 uppercase tracking-widest flex items-center gap-2">
                     <StarIcon size={14} /> Marca das Ferragens
                   </label>
                   <div className="grid grid-cols-4 gap-3">
                     {['Blum', 'Hafele', 'FGV', 'Hettich'].map(brand => (
                       <button
                         key={brand} type="button" onClick={() => setFormData({ ...formData, marcaFerragem: brand })}
-                        className={`py-4 rounded-xl border text-center transition-all ${
-                          formData.marcaFerragem === brand ? 'bg-[#F7D634] text-black border-[#F7D634] font-bold' : 'bg-neutral-50 border-transparent text-neutral-400 hover:border-neutral-200'
-                        }`}
+                        className={`py-4 rounded-xl border text-center transition-all ${formData.marcaFerragem === brand ? 'bg-[#F7D634] text-black border-[#F7D634] font-bold' : 'bg-neutral-50 border-transparent text-neutral-400 hover:border-neutral-200 cursor-pointer'
+                          }`}
                       >
                         <span className="text-[12px]">{brand}</span>
                       </button>
@@ -432,7 +443,7 @@ export default function BudgetModal({ isOpen, onClose }) {
               <div className="space-y-12 animate-fade-in">
                 <div className="space-y-2">
                   <h2 className="text-3xl font-bold tracking-tight">Upgrades para {formData.ambiente}</h2>
-                  <p className="text-neutral-500">Adicione funcionalidades extras para tornar seu espaço mais prático.</p>
+                  <p className="text-neutral-800">Adicione funcionalidades extras para tornar seu espaço mais prático.</p>
                 </div>
                 {renderAcessorios()}
               </div>
@@ -443,7 +454,7 @@ export default function BudgetModal({ isOpen, onClose }) {
               <div className="space-y-12 animate-fade-in">
                 <div className="space-y-2">
                   <h2 className="text-3xl font-bold tracking-tight">Puxadores</h2>
-                  <p className="text-neutral-500">O toque final que define o design do seu projeto.</p>
+                  <p className="text-neutral-800">O toque final que define o design do seu projeto.<br />Defina o tipo dos puxadores:</p>
                 </div>
                 <div className="grid grid-cols-1 gap-3">
                   {[
@@ -455,9 +466,8 @@ export default function BudgetModal({ isOpen, onClose }) {
                   ].map(pux => (
                     <button
                       key={pux} type="button" onClick={() => setFormData({ ...formData, puxadores: pux })}
-                      className={`flex items-center gap-4 p-5 rounded-2xl border transition-all ${
-                        formData.puxadores === pux ? 'bg-black text-white border-black' : 'bg-white border-neutral-100 text-neutral-500 hover:border-neutral-300'
-                      }`}
+                      className={`flex items-center gap-4 p-5 rounded-2xl border transition-all ${formData.puxadores === pux ? 'bg-black text-white border-black' : 'bg-white border-neutral-100 text-neutral-500 hover:border-neutral-300 cursor-pointer'
+                        }`}
                     >
                       <div className={`w-4 h-4 rounded-full border-2 ${formData.puxadores === pux ? 'bg-[#F7D634] border-[#F7D634]' : 'border-neutral-200'}`} />
                       <span className="text-[14px] font-semibold">{pux}</span>
@@ -472,26 +482,43 @@ export default function BudgetModal({ isOpen, onClose }) {
               <div className="space-y-12 animate-fade-in">
                 <div className="space-y-2">
                   <h2 className="text-3xl font-bold tracking-tight">Finalizar Orçamento</h2>
-                  <p className="text-neutral-500">Falta pouco! Deixe seus contatos para enviarmos a proposta.</p>
+                  <p className="text-neutral-800">Falta pouco! Deixe seus contatos para enviarmos a proposta.</p>
                 </div>
-                
+
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-[0.2em] ml-1">Nome Completo</label>
+                    <label className="text-[10px] font-bold text-neutral-800 uppercase tracking-[0.2em] ml-1">Nome Completo</label>
                     <div className="relative">
                       <UserIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
                       <input type="text" name="nome" value={formData.nome} onChange={handleNameChange} required className="w-full pl-12 pr-4 py-4 bg-neutral-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-[#F7D634]/50 transition-all font-medium text-black placeholder:text-neutral-400" placeholder="Como deseja ser chamado?" />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-[0.2em] ml-1">Seu E-mail</label>
+                    <label className="text-[10px] font-bold text-neutral-800 uppercase tracking-[0.2em] ml-1">Seu E-mail</label>
                     <div className="relative">
-                      <Mail01Icon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
-                      <input type="email" name="email" value={formData.email} onChange={handleInputChange} required className="w-full pl-12 pr-4 py-4 bg-neutral-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-[#F7D634]/50 transition-all font-medium text-black placeholder:text-neutral-400" placeholder="exemplo@email.com" />
+                      <Mail01Icon size={18} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${formData.email && !validateEmail(formData.email) ? 'text-red-500' : 'text-neutral-400'}`} />
+                      <input 
+                        type="email" 
+                        name="email" 
+                        value={formData.email} 
+                        onChange={handleInputChange} 
+                        required 
+                        className={`w-full pl-12 pr-4 py-4 bg-neutral-50 rounded-2xl outline-none transition-all font-medium text-black placeholder:text-neutral-400 border-2 ${
+                          formData.email && !validateEmail(formData.email)
+                            ? 'border-red-500/50 focus:ring-2 focus:ring-red-500/20'
+                            : 'border-transparent focus:ring-2 focus:ring-[#F7D634]/50'
+                        }`} 
+                        placeholder="exemplo@email.com" 
+                      />
                     </div>
+                    {formData.email && !validateEmail(formData.email) && (
+                      <span className="text-[10px] text-red-500 font-semibold ml-1 block animate-fade-in">
+                        Por favor, insira um e-mail válido (ex: nome@dominio.com).
+                      </span>
+                    )}
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-[0.2em] ml-1">WhatsApp</label>
+                    <label className="text-[10px] font-bold text-neutral-800 uppercase tracking-[0.2em] ml-1">WhatsApp</label>
                     <div className="relative">
                       <Message01Icon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
                       <input type="tel" name="telefone" value={formData.telefone} onChange={handlePhoneChange} required className="w-full pl-12 pr-4 py-4 bg-neutral-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-[#F7D634]/50 transition-all font-medium text-black placeholder:text-neutral-400" placeholder="(00) 00000-0000" />
@@ -552,8 +579,8 @@ export default function BudgetModal({ isOpen, onClose }) {
                           <span className="text-[11px] text-neutral-500">Clique para selecionar arquivos do seu dispositivo</span>
                         </div>
                       </label>
-                      
-                      <button 
+
+                      <button
                         type="button"
                         onClick={handleSendToBot}
                         className="w-full py-4 bg-black text-white font-bold rounded-2xl hover:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg"
@@ -596,23 +623,23 @@ export default function BudgetModal({ isOpen, onClose }) {
             {step <= 6 && (
               <div className="mt-auto pt-10 flex justify-between items-center">
                 {step > 1 ? (
-                  <button type="button" onClick={prevStep} className="text-[12px] font-bold text-neutral-400 uppercase tracking-widest hover:text-black transition-colors">Voltar</button>
+                  <button type="button" onClick={prevStep} className="text-[12px] font-bold text-neutral-800 uppercase tracking-widest hover:text-black transition-colors cursor-pointer">Voltar</button>
                 ) : <div />}
-                
+
                 {step === 1 ? null : step === 6 ? (
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
                     disabled={!isStepValid(6)}
-                    className="px-8 py-4 bg-black text-white text-[13px] font-bold rounded-2xl hover:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-lg flex items-center gap-2"
+                    className="px-8 py-4 bg-black text-white text-[13px] font-bold rounded-2xl hover:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-lg flex items-center gap-2 cursor-pointer"
                   >
                     Enviar Solicitação <ArrowRight01Icon size={18} />
                   </button>
                 ) : (
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={nextStep}
                     disabled={!isStepValid(step)}
-                    className="px-8 py-4 bg-black text-white text-[13px] font-bold rounded-2xl hover:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-lg flex items-center gap-2"
+                    className="px-8 py-4 bg-black text-white text-[13px] font-bold rounded-2xl hover:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-lg flex items-center gap-2 cursor-pointer"
                   >
                     Próximo Passo <ArrowRight01Icon size={18} />
                   </button>

@@ -97,7 +97,7 @@ export default function About() {
               key={idx}
               onMouseEnter={() => setHoveredPillar(idx)}
               onMouseLeave={() => setHoveredPillar(null)}
-              className={`p-6 rounded-2xl border transition-all duration-300 cursor-pointer ${hoveredPillar === idx
+              className={`p-6 rounded-2xl border transition-all duration-300 ${hoveredPillar === idx
                 ? 'bg-[#F7D634] border-[#F7D634] text-neutral-950 scale-105 shadow-xl shadow-[#F7D634]/10'
                 : 'bg-neutral-800/50 border-neutral-700/50 text-white hover:border-neutral-600'
                 }`}
@@ -111,12 +111,6 @@ export default function About() {
               </p>
             </div>
           ))}
-        </div>
-
-        <div className={`transition-all duration-1000 delay-700 transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <button className="px-8 py-3.5 bg-white hover:bg-slate-100 text-neutral-950 text-xs font-semibold tracking-[0.2em] uppercase rounded-full shadow-lg transition-all duration-300 transform hover:-translate-y-0.5">
-            Trabalhe Conosco
-          </button>
         </div>
       </div>
 
@@ -140,7 +134,7 @@ export default function About() {
                   key={`c1-${idx}`}
                   src={img}
                   alt="Ambiente Maison"
-                  className="w-40 md:w-56 h-56 md:h-72 object-cover rounded-3xl shadow-2xl border border-white/5 opacity-50 hover:opacity-100 hover:scale-105 transition-all duration-300 pointer-events-auto cursor-pointer"
+                  className="w-40 md:w-56 h-56 md:h-72 object-cover rounded-3xl shadow-2xl border border-white/5 opacity-50 hover:opacity-100 hover:scale-105 transition-all duration-300"
                 />
               ))}
             </motion.div>
@@ -159,7 +153,7 @@ export default function About() {
                   key={`c2-${idx}`}
                   src={img}
                   alt="Ambiente Maison"
-                  className="w-40 md:w-56 h-56 md:h-72 object-cover rounded-3xl shadow-2xl border border-white/5 opacity-50 hover:opacity-100 hover:scale-105 transition-all duration-300 pointer-events-auto cursor-pointer"
+                  className="w-40 md:w-56 h-56 md:h-72 object-cover rounded-3xl shadow-2xl border border-white/5 opacity-50 hover:opacity-100 hover:scale-105 transition-all duration-300"
                 />
               ))}
             </motion.div>
