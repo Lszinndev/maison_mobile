@@ -18,19 +18,19 @@ import {
 } from 'hugeicons-react';
 import ProposalModal from '../../components/ProposalModal';
 
-/*
+
 const mockLeads = [
   { id: 1, name: 'João ', email: 'joao@email.com', status: 'Novo', date: '25 Abr', budget: { ambiente: 'Cozinha', mdf: 'MDF Melamínico', estilo: 'Industrial', descricao: 'Projeto para cozinha americana com ilha central e acabamento fosco.' } },
   { id: 2, name: 'Maria Souza', email: 'maria@email.com', status: 'Atendimento', date: '24 Abr', budget: { ambiente: 'Quarto', mdf: 'Laca', estilo: 'Provençal', descricao: 'Closet em L com divisões específicas para calçados e vestidos.' } },
   { id: 3, name: 'Pedro Santos', email: 'pedro@email.com', status: 'Finalizado', date: '23 Abr', budget: { ambiente: 'Banheiro', mdf: 'Lâmina Natural', estilo: 'Liso', descricao: 'Gabinete suspenso com cuba esculpida em mármore.' } },
 ];
-*/
+
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  //const [leads, setLeads] = useState(mockLeads);
+  const [leads, setLeads] = useState(mockLeads);
   const [searchTerm, setSearchTerm] = useState('');
-  //const [selectedLead, setSelectedLead] = useState(mockLeads[0]);
+  const [selectedLead, setSelectedLead] = useState(mockLeads[0]);
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('Todos');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -53,7 +53,7 @@ export default function Dashboard() {
     }
 
     // Mocks iniciais mais completos para combinar com o novo layout
-    /*const enhancedMocks = mockLeads.map(l => ({
+    const enhancedMocks = mockLeads.map(l => ({
       ...l,
       budget: {
         ...l.budget,
@@ -62,12 +62,12 @@ export default function Dashboard() {
         medidas: '2.50m x 2.70m',
         whatsapp: '(41) 99999-0000'
       }
-    }));*/
+    }));
 
-    //setLeads(enhancedMocks);
+    setLeads(enhancedMocks);
 
     // Selecionar o lead mais recente por padrão
-    //if (enhancedMocks.length > 0) setSelectedLead(enhancedMocks[0]);
+    if (enhancedMocks.length > 0) setSelectedLead(enhancedMocks[0]);
   }, [navigate]);
 
   const handleLogout = () => {
