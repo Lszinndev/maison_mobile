@@ -44,13 +44,19 @@ export default function ProposalModal({ isOpen, onClose, lead }) {
       alert("Número de WhatsApp não encontrado no lead.");
       return;
     }
+    
+    // 1. Notifica o usuário e aciona a impressão do PDF automaticamente
+    alert("Dica Maison Mobile: A tela de impressão/salvamento do PDF será aberta agora. Salve o arquivo e, logo em seguida, a conversa do WhatsApp abrirá para você anexá-lo!");
+    window.print();
+    
+    // 2. Abre a conversa no WhatsApp pré-preenchida
     const text = `Olá ${lead.name.split(' ')[0]}, tudo bem?
-Aqui é da Maison Mobile. Segue em anexo a proposta para o seu projeto de ${lead.budget.ambiente}.
+Aqui é da Maison Mobile. Segue a proposta em PDF para o seu projeto de ${lead.budget.ambiente}.
     
 Valor Total: R$ ${formData.valorTotal || 'A combinar'}
 Condições: ${formData.parcelamento || 'Sob consulta'}
 
-(Por favor, nos envie o arquivo PDF baixado aqui nesta conversa!)`;
+(Enviei o PDF em anexo!)`;
     const url = `https://wa.me/55${phone}?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
   };

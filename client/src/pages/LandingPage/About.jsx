@@ -76,8 +76,11 @@ export default function About() {
       ref={sectionRef}
       className="bg-neutral-900 text-white flex flex-col md:flex-row min-h-screen font-sans overflow-hidden relative"
     >
+      {/* Top Gradient Overlay */}
+      <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-neutral-950 to-transparent pointer-events-none z-20" />
+
       {/* Left Column: Text & Content */}
-      <div className="flex-1 flex flex-col justify-center px-6 md:px-24 py-20 md:py-12 bg-neutral-900 z-10">
+      <div className="flex-1 flex flex-col justify-center px-6 md:px-24 py-20 md:py-12 bg-neutral-900 z-10 relative">
         <span className={`text-[#F7D634] text-xs md:text-sm font-semibold tracking-[0.3em] uppercase mb-4 transition-all duration-1000 transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
           Nossa Essência
         </span>
@@ -112,36 +115,39 @@ export default function About() {
             </div>
           ))}
         </div>
+
+        {/* Bottom Gradient Overlay to transition to Cases (bg-neutral-950) */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-neutral-950 pointer-events-none z-20" />
       </div>
 
       {/* Right Column: Netflix-style Diagonal Photo Marquee */}
-      <div className="flex-1 relative min-h-[500px] md:min-h-screen overflow-hidden bg-neutral-950">
-        <div className="absolute inset-0 bg-gradient-to-r from-neutral-900 via-transparent to-neutral-950/80 z-10 pointer-events-none" />
+      <div className="hidden md:block flex-1 relative min-h-screen overflow-hidden bg-neutral-950 z-0">
+        <div className="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-r from-neutral-900 via-transparent to-neutral-950/80 z-10 pointer-events-none" />
 
         {/* Tilted Container wrapper */}
         <div
-          className="absolute -inset-x-20 -inset-y-40 transform -rotate-12 flex justify-center gap-6"
+          className="absolute -inset-x-10 md:-inset-x-20 -inset-y-20 md:-inset-y-40 transform -rotate-12 flex justify-center gap-4 md:gap-6 scale-90 md:scale-100"
         >
           {/* Coluna 1: Sobe */}
           <div className="overflow-hidden h-full flex flex-col justify-center">
             <motion.div
               animate={{ y: ["0%", "-50%"] }}
               transition={{ ease: "linear", duration: 90, repeat: Infinity }}
-              className="flex flex-col gap-6"
+              className="flex flex-col gap-4 md:gap-6"
             >
               {[...aboutImages, ...aboutImages, ...aboutImages, ...aboutImages].map((img, idx) => (
                 <img
                   key={`c1-${idx}`}
                   src={img}
                   alt="Ambiente Maison"
-                  className="w-40 md:w-56 h-56 md:h-72 object-cover rounded-3xl shadow-2xl border border-white/5 opacity-50 hover:opacity-100 hover:scale-105 transition-all duration-300"
+                  className="w-32 md:w-56 h-48 md:h-72 object-cover rounded-3xl shadow-2xl border border-white/5 opacity-50 hover:opacity-100 hover:scale-105 transition-all duration-300"
                 />
               ))}
             </motion.div>
           </div>
 
-          {/* Coluna 2: Desce */}
-          <div className="overflow-hidden h-full flex flex-col justify-center">
+          {/* Coluna 2: Desce (Oculta no mobile para evitar poluição visual e quebra) */}
+          <div className="hidden sm:flex overflow-hidden h-full flex-col justify-center">
             <motion.div
               animate={{ y: ["-50%", "0%"] }}
               transition={{ ease: "linear", duration: 50, repeat: Infinity }}

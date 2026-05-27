@@ -12,10 +12,6 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
-  const [forgotStep, setForgotStep] = useState(1);
-  const [forgotEmail, setForgotEmail] = useState('');
-
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
@@ -32,13 +28,6 @@ export default function Login() {
         setIsLoading(false);
       }
     }, 1000);
-  };
-
-  const maskEmail = (email) => {
-    if (!email || !email.includes('@')) return '---';
-    const [user, domain] = email.split('@');
-    const [domainName, ...tldParts] = domain.split('.');
-    return `${user.slice(0, 2)}***@${domainName.slice(0, 1)}***.${tldParts.join('.')}`;
   };
 
   return (
@@ -66,14 +55,14 @@ export default function Login() {
             <div className="space-y-2">
               <label className="text-xs font-semibold text-neutral-800 ml-1">E-mail</label>
               <div className="relative group">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-300 group-focus-within:text-[#F7D634] transition-colors">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 group-focus-within:text-[#F7D634] transition-colors">
                   <Mail01Icon size={20} />
                 </div>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3.5 bg-neutral-50 border border-neutral-100 rounded-2xl text-black placeholder-neutral-300 focus:outline-none focus:border-[#F7D634]/50 focus:ring-1 focus:ring-[#F7D634]/20 transition-all text-sm"
+                  className="w-full pl-12 pr-4 py-3.5 bg-neutral-50 border border-neutral-100 rounded-2xl text-black placeholder-neutral-500 focus:outline-none focus:border-[#F7D634]/50 focus:ring-1 focus:ring-[#F7D634]/20 transition-all text-sm"
                   placeholder="exemplo@maison.com"
                   required
                 />
@@ -83,23 +72,16 @@ export default function Login() {
             <div className="space-y-2">
               <div className="flex justify-between items-center ml-1">
                 <label className="text-xs font-semibold text-neutral-800">Senha</label>
-                <button
-                  type="button"
-                  onClick={() => { setIsForgotModalOpen(true); setForgotEmail(email); }}
-                  className="text-xs text-[#F7D634] font-bold hover:underline transition-all cursor-pointer"
-                >
-                  Esqueceu a senha?
-                </button>
               </div>
               <div className="relative group">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-300 group-focus-within:text-[#F7D634] transition-colors">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 group-focus-within:text-[#F7D634] transition-colors">
                   <UserLock01Icon size={20} />
                 </div>
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-12 pr-12 py-3.5 bg-neutral-50 border border-neutral-100 rounded-2xl text-black placeholder-neutral-300 focus:outline-none focus:border-[#F7D634]/50 focus:ring-1 focus:ring-[#F7D634]/20 transition-all text-sm"
+                  className="w-full pl-12 pr-12 py-3.5 bg-neutral-50 border border-neutral-100 rounded-2xl text-black placeholder-neutral-500 focus:outline-none focus:border-[#F7D634]/50 focus:ring-1 focus:ring-[#F7D634]/20 transition-all text-sm"
                   placeholder="Sua senha"
                   required
                 />
@@ -135,7 +117,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-4 bg-[#F7D634] hover:bg-[#F7D634]/90 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold rounded-2xl transition-all flex items-center justify-center gap-2 group shadow-lg shadow-[#F7D634]/10"
+              className="w-full py-4 bg-[#F7D634] hover:bg-[#F7D634]/90 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold rounded-2xl transition-all flex items-center justify-center gap-2 group shadow-lg shadow-[#F7D634]/10 cursor-pointer"
             >
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
@@ -155,66 +137,6 @@ export default function Login() {
           <span>v15.6.02</span>
         </footer>
       </div>
-
-      {/* Modal - Estilo Dashboard */}
-      {isForgotModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="relative bg-white border border-neutral-200 w-full max-w-[400px] rounded-[32px] p-8 shadow-2xl animate-fade-up">
-            <button
-              onClick={() => { setIsForgotModalOpen(false); setForgotStep(1); }}
-              className="absolute top-6 right-6 text-neutral-300 hover:text-black"
-            >
-              <Cancel01Icon size={24} />
-            </button>
-
-            {forgotStep === 1 ? (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-xl font-bold text-black">Recuperar acesso</h2>
-                  <p className="text-neutral-500 text-sm mt-1">Informe seu e-mail cadastrado para prosseguir.</p>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-neutral-400">Seu e-mail</label>
-                  <input
-                    type="email"
-                    value={forgotEmail}
-                    onChange={(e) => setForgotEmail(e.target.value)}
-                    className="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl text-black outline-none focus:border-[#F7D634]/50"
-                    placeholder="email@maison.com"
-                  />
-                </div>
-
-                <button
-                  onClick={() => setForgotStep(2)}
-                  className="w-full bg-black text-white py-3 rounded-xl font-bold hover:bg-neutral-800 transition-all"
-                >
-                  Enviar instruções
-                </button>
-              </div>
-            ) : (
-              <div className="text-center space-y-6">
-                <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto">
-                  <Tick01Icon size={32} className="text-green-500" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-black">E-mail enviado</h2>
-                  <p className="text-neutral-500 text-sm mt-1">
-                    Verifique sua caixa de entrada:<br />
-                    <span className="text-neutral-800 mt-2 block font-medium">{maskEmail(forgotEmail)}</span>
-                  </p>
-                </div>
-                <button
-                  onClick={() => { setIsForgotModalOpen(false); setForgotStep(1); }}
-                  className="text-sm text-[#F7D634] font-bold hover:underline"
-                >
-                  Voltar para o login
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

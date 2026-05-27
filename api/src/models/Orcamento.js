@@ -1,29 +1,23 @@
 const mongoose = require('mongoose');
 
 const orcamentoSchema = new mongoose.Schema({
-  categoria: { 
-    type: String, 
-    required: true, 
-    enum: ['COZINHA', 'BANHEIRO', 'CLOSET', 'LAVANDERIA'] 
-  },
-  cliente: {
-    nome: { type: String, required: true },
-    email: { type: String, required: true },
-    telefone: { type: String, required: true }
-  },
-  dimensoes: {
-    largura: Number,
-    altura: Number
-  },
-  especificacoes: {
-    estetica: String,    // LISO, PROVENÇAL, etc.
-    acabamento: String,  // MDF, LACA, etc.
-    ferragens: String,   // BLUM, HAFAELE, etc.
-    toque_final: String
-  },
-  funcionalidades_extras: [String], 
-  status: { type: String, default: 'Pendente' },
-  criado_em: { type: Date, default: Date.now }
+  nome: { type: String, required: true },
+  email: { type: String, required: true },
+  telefone: { type: String, required: true },
+  status: { type: String, default: 'Novo' },
+  criado_em: { type: Date, default: Date.now },
+  budget: {
+    ambiente: { type: String },
+    mdf: { type: String },
+    estilo: { type: String },
+    ferragens: { type: String },
+    puxadores: { type: String },
+    medidas: { type: String },
+    whatsapp: { type: String },
+    acessorios: [String],
+    descricao: { type: String },
+    fotos: [String]
+  }
 });
 
 module.exports = mongoose.model('Orcamento', orcamentoSchema);

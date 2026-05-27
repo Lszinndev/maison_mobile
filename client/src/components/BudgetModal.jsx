@@ -104,8 +104,14 @@ export default function BudgetModal({ isOpen, onClose }) {
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
+    const MAX_SIZE = 100 * 1024; // 100kb in bytes
 
     files.forEach(file => {
+      if (file.size > MAX_SIZE) {
+        alert(`A imagem "${file.name}" excede o limite máximo permitido de 100KB (ela tem ${(file.size / 1024).toFixed(1)}KB). Por favor, envie uma imagem menor.`);
+        return;
+      }
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setFormData(prev => ({
@@ -195,38 +201,47 @@ export default function BudgetModal({ isOpen, onClose }) {
     setStep(7); // Ir para o chat final
   };
 
-  const handleSendToBot = () => {
+  const handleSendToBot = async () => {
     if (!formData.descricao.trim()) return;
 
     setIsBotTyping(true);
 
-    // Simular o lead sendo salvo após a mensagem do usuário
-    setTimeout(() => {
-      const newLead = {
-        id: Date.now(),
-        name: formData.nome,
-        email: formData.email,
-        status: 'Novo',
-        date: new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', ''),
-        budget: {
-          ambiente: formData.ambiente,
-          mdf: formData.mdf,
-          estilo: formData.estilo,
-          ferragens: formData.marcaFerragem,
-          puxadores: formData.puxadores,
-          medidas: `${formData.largura}m x ${formData.altura}m`,
-          whatsapp: formData.telefone,
-          acessorios: formData.acessorios,
-          descricao: formData.descricao,
-          fotos: formData.fotos
-        }
-      };
+    try {
+      const response = await fetch('http://localhost:3000/api/orcamentos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nome: formData.nome,
+          email: formData.email,
+          telefone: formData.telefone,
+          budget: {
+            ambiente: formData.ambiente,
+            mdf: formData.mdf,
+            estilo: formData.estilo,
+            ferragens: formData.marcaFerragem,
+            puxadores: formData.puxadores,
+            medidas: `${formData.largura}m x ${formData.altura}m`,
+            whatsapp: formData.telefone,
+            acessorios: formData.acessorios,
+            descricao: formData.descricao,
+            fotos: formData.fotos
+          }
+        }),
+      });
 
-
+      if (!response.ok) {
+        throw new Error('Falha ao enviar orçamento');
+      }
 
       setIsBotTyping(false);
       setIsChatFinished(true);
-    }, 1500);
+    } catch (error) {
+      console.error(error);
+      setIsBotTyping(false);
+      alert('Houve um erro ao enviar seu orçamento. Tente novamente.');
+    }
   };
 
   const renderAcessorios = () => {
@@ -299,7 +314,7 @@ export default function BudgetModal({ isOpen, onClose }) {
           <Cancel01Icon size={24} />
         </button>
 
-        <div className="p-8 md:p-10 flex-1 overflow-y-auto scrollbar-hide">
+        <div className="p-6 md:p-10 flex-1 overflow-y-auto scrollbar-hide">
           {step <= 6 && (
             <div className="mb-6 flex items-center gap-2">
               <span className="px-2.5 py-1 bg-[#F7D634] text-black text-[10px] font-bold rounded-md tracking-wider">PASSO {step}</span>
@@ -316,7 +331,7 @@ export default function BudgetModal({ isOpen, onClose }) {
                   <h2 className="text-3xl font-bold tracking-tight">Qual ambiente deseja mobiliar?</h2>
                   <p className="text-neutral-800">Selecione o espaço para começarmos o seu orçamento personalizado.</p>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {[
                     { id: 'Cozinha', name: 'Cozinha', img: cozinhaImg, icon: <ChefHatIcon size={28} /> },
                     { id: 'Closet', name: 'Closet', img: quartoImg, icon: <BedIcon size={28} /> },
@@ -354,7 +369,7 @@ export default function BudgetModal({ isOpen, onClose }) {
                   <p className="text-sm text-neutral-800">Defina o tamanho aproximado e a estética do seu móvel.</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-8">
                   <div className="space-y-3">
                     <label className="text-[11px] font-bold text-neutral-800 uppercase tracking-widest flex items-center gap-2">
                       <RulerIcon size={14} /> Largura (m)
@@ -379,7 +394,7 @@ export default function BudgetModal({ isOpen, onClose }) {
                   <label className="text-[11px] font-bold text-neutral-800 uppercase tracking-widest flex items-center gap-2">
                     <MagicWand01Icon size={14} /> Estética do Projeto
                   </label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {['Liso', 'Provençal', 'Com Palhinha', 'Industrial'].map(style => (
                       <button
                         key={style} type="button" onClick={() => setFormData({ ...formData, estilo: style })}
@@ -406,7 +421,7 @@ export default function BudgetModal({ isOpen, onClose }) {
                   <label className="text-[11px] font-bold text-neutral-800 uppercase tracking-widest flex items-center gap-2">
                     <PaintBucketIcon size={14} /> Acabamento
                   </label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {['MDF Melamínico', 'Laca', 'Lâmina Natural', 'Metal/Fórmica'].map(mat => (
                       <button
                         key={mat} type="button" onClick={() => setFormData({ ...formData, mdf: mat })}
@@ -423,7 +438,7 @@ export default function BudgetModal({ isOpen, onClose }) {
                   <label className="text-[11px] font-bold text-neutral-800 uppercase tracking-widest flex items-center gap-2">
                     <StarIcon size={14} /> Marca das Ferragens
                   </label>
-                  <div className="grid grid-cols-4 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {['Blum', 'Hafele', 'FGV', 'Hettich'].map(brand => (
                       <button
                         key={brand} type="button" onClick={() => setFormData({ ...formData, marcaFerragem: brand })}

@@ -2,11 +2,23 @@ import React, { useState, useEffect } from 'react';
 import logoImg from '../../assets/logo.webp';
 import heroBg from '../../assets/hero-bg.webp';
 import BudgetModal from '../../components/BudgetModal';
+import { Menu01Icon, Cancel01Icon } from 'hugeicons-react';
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState('inicio');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [isMobileMenuOpen]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -14,7 +26,6 @@ export default function Home() {
 
   useEffect(() => {
     const sections = ['inicio', 'sobre', 'cases', 'mapa'];
-
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -56,63 +67,114 @@ export default function Home() {
       </div>
 
       {/* Header / Navbar - Floating Glassmorphism */}
-      <header className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-6xl bg-neutral-950/60 backdrop-blur-md border border-white/10 px-6 md:px-10 py-4 rounded-full flex justify-between items-center shadow-2xl">
-        {/* Logo */}
-        <div className="flex items-center">
-
+      <header className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-6xl flex flex-col items-center">
+        {/* Main Pill Header */}
+        <div className="w-full bg-neutral-950/80 backdrop-blur-md border border-white/10 px-6 md:px-10 py-3 md:py-4 rounded-full flex justify-between items-center shadow-2xl transition-all duration-300 z-50 relative">
+          {/* Logo */}
           <a href="#inicio" className="flex items-center hover:scale-105 transition-transform duration-300">
             <img src={logoImg} alt="Maison Mobile" className="h-10 md:h-14 w-auto object-contain brightness-110" />
           </a>
 
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex flex-row items-center gap-10 text-xs font-light tracking-[0.2em] text-white/70">
+            <a
+              href="#inicio"
+              className={`transition-all duration-300 relative pb-1 ${activeSection === 'inicio'
+                ? 'text-white font-medium after:content-[""] after:absolute after:left-0 after:bottom-0 after:w-full after:h-[2px] after:bg-[#F7D634]'
+                : 'hover:text-white'
+                }`}
+            >
+              INÍCIO
+            </a>
+            <a
+              href="#sobre"
+              className={`transition-all duration-300 relative pb-1 ${activeSection === 'sobre'
+                ? 'text-white font-medium after:content-[""] after:absolute after:left-0 after:bottom-0 after:w-full after:h-[2px] after:bg-[#F7D634]'
+                : 'hover:text-white'
+                }`}
+            >
+              SOBRE
+            </a>
+            <a
+              href="#cases"
+              className={`transition-all duration-300 relative pb-1 ${activeSection === 'cases'
+                ? 'text-white font-medium after:content-[""] after:absolute after:left-0 after:bottom-0 after:w-full after:h-[2px] after:bg-[#F7D634]'
+                : 'hover:text-white'
+                }`}
+            >
+              CASES
+            </a>
+            <a
+              href="#mapa"
+              className={`transition-all duration-300 relative pb-1 ${activeSection === 'mapa'
+                ? 'text-white font-medium after:content-[""] after:absolute after:left-0 after:bottom-0 after:w-full after:h-[2px] after:bg-[#F7D634]'
+                : 'hover:text-white'
+                }`}
+            >
+              MAPA
+            </a>
+          </nav>
+
+          {/* Mobile Menu Toggle & Desktop CTA */}
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="hidden md:block px-6 py-2 bg-[#F7D634] hover:bg-[#e5c323] text-neutral-950 text-xs font-semibold tracking-[0.15em] uppercase rounded-full transition-all duration-300 shadow-md cursor-pointer"
+            >
+              Orçamento
+            </button>
+            <button 
+              className="md:hidden text-white hover:text-[#F7D634] transition-colors p-2"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              {isMobileMenuOpen ? <Cancel01Icon size={24} /> : <Menu01Icon size={24} />}
+            </button>
+          </div>
         </div>
 
-        {/* Menu with Scroll Spy */}
-        <nav className="hidden md:flex items-center gap-10 text-xs font-light tracking-[0.2em] text-white/70">
-          <a
-            href="#inicio"
-            className={`transition-all duration-300 relative pb-1 ${activeSection === 'inicio'
-              ? 'text-white font-medium after:content-[""] after:absolute after:left-0 after:bottom-0 after:w-full after:h-[2px] after:bg-[#F7D634]'
-              : 'hover:text-white'
-              }`}
-          >
-            INÍCIO
-          </a>
-          <a
-            href="#sobre"
-            className={`transition-all duration-300 relative pb-1 ${activeSection === 'sobre'
-              ? 'text-white font-medium after:content-[""] after:absolute after:left-0 after:bottom-0 after:w-full after:h-[2px] after:bg-[#F7D634]'
-              : 'hover:text-white'
-              }`}
-          >
-            SOBRE
-          </a>
-          <a
-            href="#cases"
-            className={`transition-all duration-300 relative pb-1 ${activeSection === 'cases'
-              ? 'text-white font-medium after:content-[""] after:absolute after:left-0 after:bottom-0 after:w-full after:h-[2px] after:bg-[#F7D634]'
-              : 'hover:text-white'
-              }`}
-          >
-            CASES
-          </a>
-          <a
-            href="#mapa"
-            className={`transition-all duration-300 relative pb-1 ${activeSection === 'mapa'
-              ? 'text-white font-medium after:content-[""] after:absolute after:left-0 after:bottom-0 after:w-full after:h-[2px] after:bg-[#F7D634]'
-              : 'hover:text-white'
-              }`}
-          >
-            MAPA
-          </a>
-        </nav>
-
-        {/* CTA Top Right */}
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="hidden md:block px-6 py-2 bg-[#F7D634] hover:bg-[#e5c323] text-neutral-950 text-xs font-semibold tracking-[0.15em] uppercase rounded-full transition-all duration-300 shadow-md cursor-pointer"
-        >
-          Orçamento
-        </button>
+        {/* Mobile Dropdown Menu with Transition */}
+        <div className={`md:hidden overflow-hidden transition-all duration-500 ease-in-out w-[95%] bg-neutral-950/90 backdrop-blur-md border border-white/10 rounded-3xl -mt-4 pt-6 ${isMobileMenuOpen ? 'max-h-[400px] opacity-100 pb-6' : 'max-h-0 opacity-0 pb-0 border-t-0'}`}>
+          <nav className="flex flex-col items-center gap-6 text-xs font-light tracking-[0.2em] text-white/70 px-6">
+            <a
+              href="#inicio"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={`transition-all duration-300 w-full text-center py-2 ${activeSection === 'inicio' ? 'text-white font-medium text-[#F7D634]' : 'hover:text-white'}`}
+            >
+              INÍCIO
+            </a>
+            <a
+              href="#sobre"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={`transition-all duration-300 w-full text-center py-2 ${activeSection === 'sobre' ? 'text-white font-medium text-[#F7D634]' : 'hover:text-white'}`}
+            >
+              SOBRE
+            </a>
+            <a
+              href="#cases"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={`transition-all duration-300 w-full text-center py-2 ${activeSection === 'cases' ? 'text-white font-medium text-[#F7D634]' : 'hover:text-white'}`}
+            >
+              CASES
+            </a>
+            <a
+              href="#mapa"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={`transition-all duration-300 w-full text-center py-2 ${activeSection === 'mapa' ? 'text-white font-medium text-[#F7D634]' : 'hover:text-white'}`}
+            >
+              MAPA
+            </a>
+            
+            <button
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                setIsModalOpen(true);
+              }}
+              className="w-full px-6 py-4 mt-2 bg-[#F7D634] hover:bg-[#e5c323] text-neutral-950 text-xs font-bold tracking-[0.15em] uppercase rounded-full transition-all duration-300 shadow-md"
+            >
+              Solicitar Orçamento
+            </button>
+          </nav>
+        </div>
       </header>
 
 

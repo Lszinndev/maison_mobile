@@ -7,9 +7,33 @@ export default function Location() {
   const sectionRef = useRef(null);
 
   const handleCopyAddress = () => {
-    navigator.clipboard.writeText(addressText);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 3000);
+    const fallbackCopy = () => {
+      const textArea = document.createElement("textarea");
+      textArea.value = addressText;
+      textArea.style.top = "0";
+      textArea.style.left = "0";
+      textArea.style.position = "fixed";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        setCopied(true);
+        setTimeout(() => setCopied(false), 3000);
+      } catch (err) {
+        console.error('Fallback: Oops, unable to copy', err);
+      }
+      document.body.removeChild(textArea);
+    };
+
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(addressText).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 3000);
+      }).catch(() => fallbackCopy());
+    } else {
+      fallbackCopy();
+    }
   };
 
   useEffect(() => {
@@ -28,10 +52,13 @@ export default function Location() {
     <div
       id="mapa"
       ref={sectionRef}
-      className="bg-neutral-900 text-white flex flex-col md:flex-row min-h-[70vh] font-sans overflow-hidden border-t border-white/5"
+      className="bg-neutral-900 text-white flex flex-col md:flex-row min-h-[70vh] font-sans overflow-hidden border-t border-white/5 relative"
     >
+      {/* Top Gradient Overlay */}
+      <div className="md:hidden absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-neutral-950 to-transparent pointer-events-none z-20" />
+
       {/* Left Column: Info & Button */}
-      <div className="flex-1 flex flex-col justify-center px-6 md:px-24 py-20 md:py-12 bg-neutral-900 z-10">
+      <div className="flex-1 flex flex-col justify-center px-6 md:px-24 py-20 md:py-12 bg-neutral-900 z-10 relative">
 
         <span className={`text-[#F7D634] text-xs md:text-sm font-semibold tracking-[0.3em] uppercase mb-4 transition-all duration-1000 transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
           Onde Estamos
@@ -82,6 +109,9 @@ export default function Location() {
             )}
           </button>
         </div>
+
+        {/* Bottom Gradient Overlay to transition to Footer (bg-neutral-950) */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-neutral-950 pointer-events-none z-20" />
       </div>
 
       {/* Right Column: Interactive Google Map */}

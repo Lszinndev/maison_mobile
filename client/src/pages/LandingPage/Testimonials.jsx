@@ -219,7 +219,7 @@ export default function Testimonials() {
                 className="flex flex-col justify-between h-full"
               >
                 <div>
-                  <div className="flex items-center gap-1 mb-3">
+                  <div className="flex items-center justify-center md:justify-start gap-1 mb-3">
                     {[...Array(5)].map((_, i) => (
                       <svg
                         key={i}
@@ -272,9 +272,9 @@ export default function Testimonials() {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
-          className="flex justify-center items-center order-1 md:order-2 h-[400px]"
+          className="flex justify-center items-center order-1 md:order-2 h-[350px] md:h-[400px] w-full overflow-hidden scale-[0.85] sm:scale-110"
         >
-          <RadialIntro orbitItems={ITEMS} onHoverItem={setActiveItem} stageSize={320} imageSize={56} />
+          <RadialIntro orbitItems={ITEMS} onHoverItem={setActiveItem} stageSize={320} imageSize={80} />
         </motion.div>
 
 

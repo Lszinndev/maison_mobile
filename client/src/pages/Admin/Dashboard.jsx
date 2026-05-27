@@ -19,18 +19,32 @@ import {
 import ProposalModal from '../../components/ProposalModal';
 
 
-/*const mockLeads = [
-  { id: 1, name: 'João ', email: 'joao@email.com', status: 'Novo', date: '25 Abr', budget: { ambiente: 'Cozinha', mdf: 'MDF Melamínico', estilo: 'Industrial', descricao: 'Projeto para cozinha americana com ilha central e acabamento fosco.' } },
-  { id: 2, name: 'Maria Souza', email: 'maria@email.com', status: 'Atendimento', date: '24 Abr', budget: { ambiente: 'Quarto', mdf: 'Laca', estilo: 'Provençal', descricao: 'Closet em L com divisões específicas para calçados e vestidos.' } },
-  { id: 3, name: 'Pedro Santos', email: 'pedro@email.com', status: 'Finalizado', date: '23 Abr', budget: { ambiente: 'Banheiro', mdf: 'Lâmina Natural', estilo: 'Liso', descricao: 'Gabinete suspenso com cuba esculpida em mármore.' } },
-];*/
 
+const MOCK_LEAD = {
+  id: 'mock-1',
+  name: 'Gabriel Albuquerque',
+  email: 'gabriel.albuquerque@gmail.com',
+  telefone: '(41) 99887-7665',
+  status: 'Novo',
+  date: new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', ''),
+  budget: {
+    ambiente: 'Cozinha Gourmet',
+    mdf: 'Nobile Grigio & Louro Freijó',
+    estilo: 'Contemporâneo / Minimalista',
+    ferragens: 'Blum Tandembox / Amortecedores',
+    puxadores: 'Cava Oculto',
+    medidas: '4.50m x 2.80m',
+    whatsapp: 'Sim',
+    descricao: 'Solicito orçamento para cozinha planejada em ilha. Desejo portas em MDF cinza fosco texturizado e detalhes superiores em amadeirado Louro Freijó natural. Despensa embutida com iluminação LED interna nas prateleiras e gavetas corrediças ocultas com amortecimento.',
+    fotos: []
+  }
+};
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  //const [leads, setLeads] = useState(mockLeads);
+  const [leads, setLeads] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  //const [selectedLead, setSelectedLead] = useState(mockLeads[0]);
+  const [selectedLead, setSelectedLead] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('Todos');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -38,6 +52,7 @@ export default function Dashboard() {
   const [isEditing, setIsEditing] = useState(false);
   const [editedLead, setEditedLead] = useState(null);
   const [viewingPhoto, setViewingPhoto] = useState(null);
+  const [isMobileListVisible, setIsMobileListVisible] = useState(true);
   const leadsPerPage = 8;
 
   // Resetar para a primeira página ao buscar ou filtrar
@@ -52,22 +67,40 @@ export default function Dashboard() {
       return;
     }
 
-    // Mocks iniciais mais completos para combinar com o novo layout
-    /*const enhancedMocks = mockLeads.map(l => ({
-      ...l,
-      budget: {
-        ...l.budget,
-        ferragens: 'Blum',
-        puxadores: 'Cava (Usinado)',
-        medidas: '2.50m x 2.70m',
-        whatsapp: '(41) 99999-0000'
+    const fetchLeads = async () => {
+      try {
+        const res = await fetch('http://localhost:3000/api/orcamentos');
+        if (res.ok) {
+          const data = await res.json();
+          const formattedLeads = data.map(item => ({
+            id: item._id,
+            name: item.nome,
+            email: item.email,
+            telefone: item.telefone,
+            status: item.status,
+            date: new Date(item.criado_em).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', ''),
+            budget: item.budget || {}
+          }));
+          
+          if (formattedLeads.length > 0) {
+            setLeads(formattedLeads);
+            setSelectedLead(formattedLeads[0]);
+          } else {
+            setLeads([MOCK_LEAD]);
+            setSelectedLead(MOCK_LEAD);
+          }
+        } else {
+          setLeads([MOCK_LEAD]);
+          setSelectedLead(MOCK_LEAD);
+        }
+      } catch (err) {
+        console.error("Erro ao buscar leads, usando mock local", err);
+        setLeads([MOCK_LEAD]);
+        setSelectedLead(MOCK_LEAD);
       }
-    }));
+    };
 
-    setLeads(enhancedMocks);
-
-    // Selecionar o lead mais recente por padrão
-    if (enhancedMocks.length > 0) setSelectedLead(enhancedMocks[0]);*/
+    fetchLeads();
   }, [navigate]);
 
   const handleLogout = () => {
@@ -75,9 +108,25 @@ export default function Dashboard() {
     navigate('/admin');
   };
 
-  const handleStatusChange = (id, newStatus) => {
-    setLeads(prev => prev.map(l => l.id === id ? { ...l, status: newStatus } : l));
-    if (selectedLead?.id === id) setSelectedLead({ ...selectedLead, status: newStatus });
+  const handleStatusChange = async (id, newStatus) => {
+    if (id === 'mock-1') {
+      setLeads(prev => prev.map(l => l.id === id ? { ...l, status: newStatus } : l));
+      if (selectedLead?.id === id) setSelectedLead(prev => ({ ...prev, status: newStatus }));
+      return;
+    }
+    try {
+      const res = await fetch(`http://localhost:3000/api/orcamentos/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      if (res.ok) {
+        setLeads(prev => prev.map(l => l.id === id ? { ...l, status: newStatus } : l));
+        if (selectedLead?.id === id) setSelectedLead(prev => ({ ...prev, status: newStatus }));
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar status", error);
+    }
   };
 
   const handleStartEdit = () => {
@@ -90,12 +139,32 @@ export default function Dashboard() {
     setEditedLead(null);
   };
 
-  const handleSaveEdit = () => {
-    const updatedLeads = leads.map(l => l.id === editedLead.id ? editedLead : l);
-    setLeads(updatedLeads);
-    setSelectedLead(editedLead);
-    setIsEditing(false);
-    setEditedLead(null);
+  const handleSaveEdit = async () => {
+    if (editedLead.id === 'mock-1') {
+      const updatedLeads = leads.map(l => l.id === editedLead.id ? editedLead : l);
+      setLeads(updatedLeads);
+      setSelectedLead(editedLead);
+      setIsEditing(false);
+      setEditedLead(null);
+      return;
+    }
+    try {
+      const { id, name, email, telefone, status, budget } = editedLead;
+      const res = await fetch(`http://localhost:3000/api/orcamentos/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome: name, email, telefone, status, budget })
+      });
+      if (res.ok) {
+        const updatedLeads = leads.map(l => l.id === editedLead.id ? editedLead : l);
+        setLeads(updatedLeads);
+        setSelectedLead(editedLead);
+        setIsEditing(false);
+        setEditedLead(null);
+      }
+    } catch (error) {
+      console.error("Erro ao salvar edição", error);
+    }
   };
 
   const handleEditChange = (field, value, isBudgetField = false) => {
@@ -124,28 +193,56 @@ export default function Dashboard() {
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
-    <div className={`h-screen font-sans flex antialiased overflow-hidden selection:bg-[#F7D634] selection:text-black transition-colors duration-500 bg-[#F5F5F7] text-[#1D1D1F]`}>
+    <div className={`h-screen font-sans flex flex-col md:flex-row antialiased overflow-hidden selection:bg-[#F7D634] selection:text-black transition-colors duration-500 bg-[#F5F5F7] text-[#1D1D1F]`}>
 
-      {/* 1. Slim Sidebar */}
-      <aside className={`w-16 lg:w-20 border-r flex flex-col items-center py-8 gap-10 shrink-0 transition-colors duration-500 bg-white border-neutral-200`}>
-        <img src={logoImg} alt="M" className="h-5 w-auto" />
-        <nav className="flex flex-col gap-8">
+      {/* 1. Desktop Slim Sidebar */}
+      <aside className="hidden md:flex flex-col items-center justify-start w-16 lg:w-20 py-8 border-r shrink-0 transition-colors duration-500 bg-white border-neutral-200 z-50">
+        <img src={logoImg} alt="M" className="h-5 w-auto mb-10" />
+        <nav className="flex flex-col gap-8 items-center">
           <SidebarIcon
             icon={<UserGroupIcon size={22} />}
             active
             badge={leads.filter(l => l.status === 'Novo').length}
           />
         </nav>
-
         <div className="mt-auto flex flex-col items-center gap-6">
-          <button onClick={handleLogout} className="text-zinc-600 transition-colors p-2 hover:text-black">
+          <button onClick={handleLogout} className="text-zinc-600 transition-colors p-2 hover:text-black cursor-pointer">
             <Logout01Icon size={22} />
           </button>
         </div>
       </aside>
 
+      {/* 2. Mobile Fixed Bottom Pill Footer */}
+      <footer className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-t border-neutral-200/50 flex items-center justify-between px-6 z-50">
+        {/* Invisible spacer to perfectly center the Leads pill button */}
+        <div className="w-9" />
+        
+        {/* Leads Capsule Option */}
+        <button
+          onClick={() => setIsMobileListVisible(true)}
+          className={`flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-semibold tracking-wider uppercase transition-all duration-300 cursor-pointer ${
+            isMobileListVisible
+              ? 'bg-[#F7D634] text-black shadow-lg shadow-[#F7D634]/15'
+              : 'bg-neutral-100 text-neutral-500 hover:text-black'
+          }`}
+        >
+          <UserGroupIcon size={16} />
+          <span>Leads</span>
+          {leads.filter(l => l.status === 'Novo').length > 0 && (
+            <span className="w-4.5 h-4.5 bg-[#FF3B30] text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+              {leads.filter(l => l.status === 'Novo').length}
+            </span>
+          )}
+        </button>
+
+        {/* Logout Icon */}
+        <button onClick={handleLogout} className="text-zinc-500 hover:text-black transition-colors p-2 cursor-pointer">
+          <Logout01Icon size={20} />
+        </button>
+      </footer>
+
       {/* 2. Middle Pane - List */}
-      <section className="w-80 lg:w-96 border-r flex flex-col shrink-0 transition-colors duration-500 bg-[#F5F5F7] border-neutral-200">
+      <section className={`w-full md:w-80 lg:w-96 border-r flex-col shrink-0 overflow-hidden transition-colors duration-500 bg-[#F5F5F7] border-neutral-200 ${!isMobileListVisible ? 'hidden md:flex' : 'flex'}`}>
         <header className="px-3 pt-6 pb-4 space-y-6">
           <div className="flex justify-between items-center px-1">
             <h1 className="text-xl font-bold tracking-tight">Leads</h1>
@@ -210,13 +307,14 @@ export default function Dashboard() {
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto px-3 py-2 space-y-1 scrollbar-hide">
+        <div className="flex-1 overflow-y-auto px-3 py-2 pb-20 md:pb-2 space-y-1 scrollbar-hide">
           {currentLeads.map((lead) => (
             <div
               key={lead.id}
               onClick={() => {
                 setSelectedLead(lead);
                 setIsEditing(false);
+                setIsMobileListVisible(false);
               }}
               className={`p-4 rounded-2xl cursor-pointer transition-all duration-300 relative ${selectedLead?.id === lead.id
                 ? 'bg-white ring-1 ring-black/5 z-10'
@@ -264,81 +362,135 @@ export default function Dashboard() {
       </section>
 
       {/* 3. Right Pane - Detail View (Ultra Modern Pro) */}
-      <main className="flex-1 flex flex-col min-w-0 transition-colors duration-500 bg-white">
+      <main className={`flex-1 flex-col min-w-0 overflow-hidden transition-colors duration-500 bg-white ${isMobileListVisible ? 'hidden md:flex' : 'flex'}`}>
         {selectedLead ? (
           <div className="flex flex-col h-full animate-fade-in">
             {/* Header */}
-            <header className="p-10 pb-12 flex justify-between items-start border-b transition-colors duration-500 bg-[#F5F5F7]/30 border-neutral-100 backdrop-blur-xl">
-              <div className="space-y-2">
-                <div className="flex items-center gap-4">
-                  <h2 className="text-4xl font-bold tracking-tight text-black">{selectedLead.name}</h2>
-                  <AppleBadge status={selectedLead.status} />
-                </div>
-                <div className="flex items-center gap-4 text-[13px] text-zinc-500 font-medium">
-                  <span>{selectedLead.email}</span>
-                  <span className="w-1 h-1 rounded-full bg-neutral-300" />
-                  <span>ID #{selectedLead.id.toString().padStart(4, '0')}</span>
+            <header className="p-6 md:p-10 pb-8 md:pb-12 border-b transition-colors duration-500 bg-[#F5F5F7]/30 border-neutral-100 backdrop-blur-xl">
+              {/* Top Control Bar (Mobile only: Back and action buttons side by side) */}
+              <div className="flex justify-between items-center w-full md:hidden mb-6">
+                <button 
+                  className="flex items-center gap-2 text-sm text-neutral-500 hover:text-black font-medium"
+                  onClick={() => setIsMobileListVisible(true)}
+                >
+                  <ArrowRight01Icon size={16} className="rotate-180" />
+                  <span>Voltar</span>
+                </button>
+                
+                <div className="flex gap-2">
+                  {isEditing ? (
+                    <>
+                      <button
+                        onClick={handleCancelEdit}
+                        className="px-4 py-2 text-xs font-bold rounded-xl border transition-all bg-white text-black border-neutral-200 hover:bg-neutral-50 cursor-pointer"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        onClick={handleSaveEdit}
+                        className="px-4 py-2 text-xs font-bold rounded-xl transition-all bg-black text-white hover:bg-neutral-800 cursor-pointer"
+                      >
+                        Salvar
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={handleStartEdit}
+                        className="px-4 py-2 text-xs font-bold rounded-xl border transition-all bg-white text-black border-neutral-200 hover:bg-neutral-50 cursor-pointer"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => setIsProposalModalOpen(true)}
+                        className="px-4 py-2 text-xs font-bold rounded-xl transition-all bg-black text-white hover:bg-neutral-800 cursor-pointer"
+                      >
+                        Proposta
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
-              <div className="flex gap-3">
-                {isEditing ? (
-                  <>
-                    <button
-                      onClick={handleCancelEdit}
-                      className="px-6 py-2.5 text-[13px] font-bold rounded-xl border transition-all bg-white text-black border-neutral-200 hover:bg-neutral-50 cursor-pointer"
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      onClick={handleSaveEdit}
-                      className="px-6 py-2.5 text-[13px] font-bold rounded-xl transition-all bg-black text-white hover:bg-neutral-800 cursor-pointer"
-                    >
-                      Salvar Alterações
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={handleStartEdit}
-                      className="px-6 py-2.5 text-[13px] font-bold rounded-xl border transition-all bg-white text-black border-neutral-200 hover:bg-neutral-50 cursor-pointer"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => setIsProposalModalOpen(true)}
-                      className="px-6 py-2.5 text-[13px] font-bold rounded-xl transition-all bg-black text-white hover:bg-neutral-800 cursor-pointer"
-                    >
-                      Gerar Proposta
-                    </button>
-                  </>
-                )}
+
+              {/* Main Header Info (Desktop: Name on left, Actions on right. Mobile: Name only) */}
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-4 md:gap-0">
+                <div className="space-y-2 w-full md:w-auto">
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-black break-words max-w-[200px] sm:max-w-xs md:max-w-md lg:max-w-2xl">{selectedLead.name}</h2>
+                    <AppleBadge status={selectedLead.status} />
+                  </div>
+                  <div className="flex items-center gap-3 text-[13px] text-zinc-500 font-medium">
+                    <span className="truncate max-w-[180px] sm:max-w-none">{selectedLead.email}</span>
+                    <span className="w-1 h-1 rounded-full bg-neutral-300" />
+                    <span>ID #{selectedLead.id.toString().padStart(4, '0')}</span>
+                  </div>
+                </div>
+
+                {/* Desktop Actions */}
+                <div className="hidden md:flex gap-3">
+                  {isEditing ? (
+                    <>
+                      <button
+                        onClick={handleCancelEdit}
+                        className="px-6 py-2.5 text-[13px] font-bold rounded-xl border transition-all bg-white text-black border-neutral-200 hover:bg-neutral-50 cursor-pointer"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        onClick={handleSaveEdit}
+                        className="px-6 py-2.5 text-[13px] font-bold rounded-xl transition-all bg-black text-white hover:bg-neutral-800 cursor-pointer"
+                      >
+                        Salvar Alterações
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={handleStartEdit}
+                        className="px-6 py-2.5 text-[13px] font-bold rounded-xl border transition-all bg-white text-black border-neutral-200 hover:bg-neutral-50 cursor-pointer"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => setIsProposalModalOpen(true)}
+                        className="px-6 py-2.5 text-[13px] font-bold rounded-xl transition-all bg-black text-white hover:bg-neutral-800 cursor-pointer"
+                      >
+                        Gerar Proposta
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             </header>
 
             {/* Body */}
-            <div className="flex-1 overflow-y-auto p-12 lg:p-16 space-y-16 scrollbar-hide">
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-12 gap-x-8">
+            <div className="flex-1 overflow-y-auto p-6 pb-24 md:p-12 lg:p-16 space-y-8 md:space-y-16 scrollbar-hide">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <DetailBox
                   label="Ambiente"
                   value={isEditing ? editedLead.budget.ambiente : selectedLead.budget.ambiente}
                   isEditing={isEditing}
                   onChange={(val) => handleEditChange('ambiente', val, true)}
+                  icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>}
                 />
                 <DetailBox
                   label="Acabamento"
                   value={isEditing ? editedLead.budget.mdf : selectedLead.budget.mdf}
                   isEditing={isEditing}
                   onChange={(val) => handleEditChange('mdf', val, true)}
+                  icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V5z" /><path strokeLinecap="round" strokeLinejoin="round" d="M9 4v16m6-16v16" /></svg>}
                 />
                 <DetailBox
                   label="Estilo"
                   value={isEditing ? editedLead.budget.estilo : selectedLead.budget.estilo}
                   isEditing={isEditing}
                   onChange={(val) => handleEditChange('estilo', val, true)}
+                  icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-3" /></svg>}
                 />
                 <DetailBox
                   label="Recebido"
                   value={selectedLead.date}
+                  icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>}
                 />
 
                 <DetailBox
@@ -346,24 +498,28 @@ export default function Dashboard() {
                   value={isEditing ? (editedLead.budget.ferragens || '') : (selectedLead.budget.ferragens || 'N/A')}
                   isEditing={isEditing}
                   onChange={(val) => handleEditChange('ferragens', val, true)}
+                  icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>}
                 />
                 <DetailBox
                   label="Puxadores"
                   value={isEditing ? (editedLead.budget.puxadores || '') : (selectedLead.budget.puxadores || 'N/A')}
                   isEditing={isEditing}
                   onChange={(val) => handleEditChange('puxadores', val, true)}
+                  icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4M8 12a4 4 0 118 0 4 4 0 01-8 0z" /></svg>}
                 />
                 <DetailBox
                   label="Medidas"
                   value={isEditing ? (editedLead.budget.medidas || '') : (selectedLead.budget.medidas || 'N/A')}
                   isEditing={isEditing}
                   onChange={(val) => handleEditChange('medidas', val, true)}
+                  icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M4 7v10M20 7v10M8 5v14M12 7v10M16 5v14" /></svg>}
                 />
                 <DetailBox
                   label="WhatsApp"
                   value={isEditing ? (editedLead.budget.whatsapp || '') : (selectedLead.budget.whatsapp || 'N/A')}
                   isEditing={isEditing}
                   onChange={(val) => handleEditChange('whatsapp', val, true)}
+                  icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>}
                 />
               </div>
 
@@ -373,9 +529,9 @@ export default function Dashboard() {
                     <div className="w-1.5 h-1.5 rounded-full bg-[#F7D634]" />
                     <h3 className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Acessórios & Upgrades</h3>
                   </div>
-                  <div className="flex flex-wrap gap-3">
+                  <div className="bg-neutral-50/70 border border-neutral-200/60 p-6 rounded-3xl transition-all duration-300 hover:shadow-md hover:shadow-black/[0.02] hover:bg-white flex flex-wrap gap-3">
                     {selectedLead.budget.acessorios.map((acc, index) => (
-                      <div key={index} className="px-4 py-2 border rounded-xl text-[13px] font-semibold transition-colors bg-white border-neutral-200 text-black">
+                      <div key={index} className="px-4 py-2 border rounded-xl text-[13px] font-semibold transition-colors bg-white border-neutral-200 text-black shadow-sm">
                         {acc}
                       </div>
                     ))}
@@ -388,17 +544,19 @@ export default function Dashboard() {
                   <div className="w-1.5 h-1.5 rounded-full bg-[#F7D634]" />
                   <h3 className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Observações do projeto</h3>
                 </div>
-                {isEditing ? (
-                  <textarea
-                    value={editedLead.budget.descricao}
-                    onChange={(e) => handleEditChange('descricao', e.target.value, true)}
-                    className="w-full p-4 rounded-2xl border border-neutral-200 text-[18px] font-medium focus:ring-2 focus:ring-[#F7D634] outline-none min-h-[150px] resize-none"
-                  />
-                ) : (
-                  <p className="text-[22px] leading-snug max-w-3xl font-medium tracking-tight break-words whitespace-pre-wrap text-neutral-700">
-                    "{selectedLead.budget.descricao}"
-                  </p>
-                )}
+                <div className="bg-neutral-50/70 border border-neutral-200/60 p-6 md:p-8 rounded-3xl transition-all duration-300 hover:shadow-md hover:shadow-black/[0.02] hover:bg-white">
+                  {isEditing ? (
+                    <textarea
+                      value={editedLead.budget.descricao}
+                      onChange={(e) => handleEditChange('descricao', e.target.value, true)}
+                      className="w-full p-4 rounded-2xl border border-neutral-200 text-[18px] font-medium focus:ring-2 focus:ring-[#F7D634] outline-none min-h-[150px] resize-none bg-black/5"
+                    />
+                  ) : (
+                    <p className="text-[18px] md:text-[22px] leading-relaxed max-w-3xl font-medium tracking-tight break-words whitespace-pre-wrap text-neutral-800">
+                      "{selectedLead.budget.descricao}"
+                    </p>
+                  )}
+                </div>
               </section>
 
               {selectedLead.budget.fotos && selectedLead.budget.fotos.length > 0 && (
@@ -505,31 +663,34 @@ function SidebarIcon({ icon, active = false, badge = 0 }) {
 
 function AppleBadge({ status }) {
   const styles = {
-    'Novo': 'bg-[#0A84FF]/20 text-[#0A84FF]',
-    'Atendimento': 'bg-[#FF9F0A]/20 text-[#FF9F0A]',
-    'Pendente': 'bg-[#FF3B30]/20 text-[#FF3B30]',
-    'Finalizado': 'bg-[#30D158]/20 text-[#30D158]'
+    'Novo': 'bg-[#0A84FF]/15 text-[#0A84FF]',
+    'Atendimento': 'bg-[#FF9F0A]/15 text-[#FF9F0A]',
+    'Pendente': 'bg-[#FF3B30]/15 text-[#FF3B30]',
+    'Finalizado': 'bg-[#30D158]/15 text-[#30D158]'
   };
   return (
-    <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${styles[status]}`}>
+    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider shrink-0 select-none ${styles[status]}`}>
       {status}
-    </div>
+    </span>
   );
 }
 
-function DetailBox({ label, value, isEditing = false, onChange }) {
+function DetailBox({ label, value, isEditing = false, onChange, icon }) {
   return (
-    <div className="space-y-2">
-      <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">{label}</p>
+    <div className="bg-neutral-50/70 border border-neutral-200/60 p-5 rounded-2xl transition-all duration-300 hover:shadow-md hover:shadow-black/[0.02] hover:bg-white flex flex-col justify-between min-h-[105px]">
+      <div className="flex justify-between items-start gap-4 mb-2">
+        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">{label}</p>
+        {icon && <div className="text-zinc-400">{icon}</div>}
+      </div>
       {isEditing && onChange ? (
         <input
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full p-2 -ml-2 rounded-lg border-neutral-200 text-[18px] font-bold tracking-tight text-black focus:ring-1 focus:ring-[#F7D634] outline-none bg-black/5 border"
+          className="w-full p-2 -ml-2 rounded-lg border-neutral-200 text-base font-semibold tracking-tight text-black focus:ring-1 focus:ring-[#F7D634] outline-none bg-black/5 border"
         />
       ) : (
-        <p className="text-[18px] font-bold tracking-tight text-black">{value}</p>
+        <p className="text-base font-semibold tracking-tight text-neutral-800 break-words">{value || 'N/A'}</p>
       )}
     </div>
   );

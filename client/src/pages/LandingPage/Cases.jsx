@@ -84,6 +84,16 @@ export default function Cases() {
   const [isDragging, setIsDragging] = useState(false);
   const sectionRef = useRef(null);
   const [slideOffset, setSlideOffset] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const displayedCases = isMobile ? casesData.slice(0, 4) : casesData;
 
   useEffect(() => {
     const updateOffset = () => {
@@ -99,20 +109,20 @@ export default function Cases() {
 
   const nextSlide = () => {
 
-    setCurrentIndex((prev) => (prev + 1) % casesData.length);
+    setCurrentIndex((prev) => (prev + 1) % displayedCases.length);
   };
 
   const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + casesData.length) % casesData.length);
+    setCurrentIndex((prev) => (prev - 1 + displayedCases.length) % displayedCases.length);
   };
 
   // Autoplay Effect
   useEffect(() => {
     const timer = setInterval(() => {
       nextSlide();
-    }, 2000); // Avança a cada 5 segundos
+    }, 4000); // Avança a cada 4 segundos
     return () => clearInterval(timer);
-  }, [currentIndex]);
+  }, [currentIndex, displayedCases.length]);
 
   // Drag and Swipe Handlers
   const handleMouseDown = (e) => {
@@ -191,7 +201,7 @@ export default function Cases() {
           style={{ transform: `translateX(-${slideOffset}px)` }}
 
         >
-          {casesData.map((item, idx) => (
+          {displayedCases.map((item, idx) => (
             <div
               key={item.id}
               className={`w-[280px] sm:w-[450px] flex-shrink-0 rounded-[40px] overflow-hidden relative group shadow-2xl cursor-pointer transition-all duration-1000 transform ${isVisible
@@ -240,15 +250,15 @@ export default function Cases() {
       <div className="flex justify-center mt-12 gap-6">
         <button
           onClick={prevSlide}
-          className="w-12 h-12 rounded-full border border-white/10 hover:border-white/30 bg-neutral-900 text-white hover:text-[#F7D634] flex items-center justify-center transition-all duration-300 shadow-md cursor-pointer"
+          className="w-16 h-16 md:w-14 md:h-14 rounded-full border border-white/10 hover:border-white/30 bg-neutral-900 text-white hover:text-[#F7D634] flex items-center justify-center transition-all duration-300 shadow-md cursor-pointer"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 md:h-6 md:w-6" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
           </svg>
         </button>
 
         <div className="flex items-center gap-3 bg-neutral-900 border border-white/5 px-6 py-3 rounded-full">
-          {casesData.map((_, idx) => (
+          {displayedCases.map((_, idx) => (
             <button
               key={idx}
               onClick={() => setCurrentIndex(idx)}
@@ -260,9 +270,9 @@ export default function Cases() {
 
         <button
           onClick={nextSlide}
-          className="w-12 h-12 rounded-full border border-white/10 hover:border-white/30 bg-neutral-900 text-white hover:text-[#F7D634] flex items-center justify-center transition-all duration-300 shadow-md cursor-pointer"
+          className="w-16 h-16 md:w-14 md:h-14 rounded-full border border-white/10 hover:border-white/30 bg-neutral-900 text-white hover:text-[#F7D634] flex items-center justify-center transition-all duration-300 shadow-md cursor-pointer"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 md:h-6 md:w-6" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
           </svg>
         </button>

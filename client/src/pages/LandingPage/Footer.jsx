@@ -79,7 +79,7 @@ export default function Footer() {
 
         {/* Bottom Row: Copyright */}
         <div className={`pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500 transition-all duration-1000 delay-500 transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <span>© 2026 Todos os direitos reservados a Maison Mobile Marcenaria.</span>
+          <span className="text-center md:text-left">© 2026 Todos os direitos reservados a Maison Mobile Marcenaria.</span>
 
           <div className="flex items-center gap-2">
             <span className="text-slate-600">Área Restrita:</span>

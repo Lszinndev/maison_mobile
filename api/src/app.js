@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const connectDB = require('./config/database');
 const orcamentoRoutes = require('./routes/orcamentoRoutes');
 
@@ -8,6 +9,7 @@ const app = express();
 connectDB();
 
 // Middlewares
+app.use(cors());
 app.use(express.json());
 
 // Rotas da API
