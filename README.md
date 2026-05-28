@@ -1,6 +1,6 @@
 # Maison Mobile - Projeto Marcenaria
 
-Este é o projeto **Maison Mobile**, uma plataforma para marcenaria de alto padrão. O projeto está dividido em duas partes principais: **Client** (Front-end) e **Server** (Back-end).
+Este é o projeto **Maison Mobile**, uma plataforma para marcenaria de alto padrão. O projeto está dividido em duas partes principais: **Client** (Front-end) e **Api** (Back-end).
 
 ## 🚀 Tecnologias Utilizadas
 
@@ -10,16 +10,14 @@ Este é o projeto **Maison Mobile**, uma plataforma para marcenaria de alto padr
 - **React Router DOM** (Navegação)
 - **Axios** (Consumo de API)
 
-### Back-end (`/server`)
+### Back-end (`/api`)
 - **Node.js** com **Express**
-- **Bun** (Runtime e Package Manager)
-- **MySQL** (Banco de dados)
+- **Mongoose** / **MongoDB**
+- **Bun** / **npm** (Runtime e Gerenciamento de Pacotes)
 
 ---
 
 ## 🛠️ Como Executar o Projeto
-
-Certifique-se de ter o [Bun](https://bun.sh/) instalado em sua máquina.
 
 ### 1. Inicializando o Front-end
 
@@ -33,11 +31,11 @@ O cliente estará rodando em `http://localhost:5173/`.
 ### 2. Inicializando o Back-end
 
 ```bash
-cd server
+cd api
 bun install
 bun run dev
 ```
-O servidor estará rodando em `http://localhost:5000/`.
+O servidor estará rodando em `http://localhost:3000/`.
 
 ---
 
@@ -51,13 +49,12 @@ O servidor estará rodando em `http://localhost:5000/`.
 │   │   ├── /hooks
 │   │   ├── /services
 │   │   └── /pages
-├── /server          (Node.js + Express)
+├── /api             (Node.js + Express + MongoDB)
 │   ├── /src
 │   │   ├── /config
 │   │   ├── /controllers
 │   │   ├── /models
 │   │   ├── /routes
-│   │   └── /middlewares
+│   └── server.js
 ├── /docs            (Documentação)
-└── docker-compose.yml
 ```
