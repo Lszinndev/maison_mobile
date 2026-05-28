@@ -13,6 +13,10 @@ app.use(cors());
 app.use(express.json());
 
 // Rotas da API
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', message: 'Maison Mobile API rodando com sucesso!' });
+});
+
 app.use('/api/orcamentos', orcamentoRoutes);
 
 // Rota de fallback para caminhos não encontrados
