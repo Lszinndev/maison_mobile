@@ -45,7 +45,6 @@ export default function ProposalModal({ isOpen, onClose, lead }) {
       return;
     }
 
-    // 2. Abre a conversa no WhatsApp pré-preenchida
     const text = `Olá ${lead.name.split(' ')[0]}, tudo bem?
 Aqui é da Maison Mobile. Segue a proposta em PDF para o seu projeto de ${lead.budget.ambiente}.
     
