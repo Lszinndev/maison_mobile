@@ -206,6 +206,7 @@ Condições: ${formData.parcelamento || 'Sob consulta'}
                 {/* <p className="text-[11px] text-[#737373]">contato@maison.com</p> */}
                 <p className="text-[11px] text-[#737373]">(41) 99696-9634</p>
                 <p className="text-[11px] text-[#737373] mt-2">Data: {new Date().toLocaleDateString('pt-BR')}</p>
+                <p className="text-[11px] text-[#737373] mt-2">Hora: {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
               </div>
             </div>
 
