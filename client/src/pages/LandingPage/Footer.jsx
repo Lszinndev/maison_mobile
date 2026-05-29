@@ -83,7 +83,7 @@ export default function Footer() {
 
           <div className="flex items-center gap-2">
             <span className="text-slate-600">Área Restrita:</span>
-            <Link to="/admin" className="text-slate-400 hover:text-[#F7D634] transition-colors font-medium">
+            <Link to="/admin" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-[#F7D634] transition-colors font-medium">
               Acessar Painel
             </Link>
           </div>
