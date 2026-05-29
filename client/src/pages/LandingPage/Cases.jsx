@@ -22,7 +22,7 @@ const casesData = [
   {
     id: 2,
     image: case2,
-    title: 'Painel Home Theater',
+    title: 'Banheiro Contemporâneo',
     category: 'Living'
   },
   {
@@ -34,13 +34,13 @@ const casesData = [
   {
     id: 4,
     image: case4,
-    title: 'Home Office Premium',
-    category: 'Corporativo'
+    title: 'Painel home theater',
+    category: 'Lazer'
   },
   {
     id: 5,
     image: case5,
-    title: 'Área Gourmet Externa',
+    title: 'Painel Home Theater',
     category: 'Lazer'
   },
   {
@@ -52,26 +52,26 @@ const casesData = [
   {
     id: 7,
     image: case7,
-    title: 'Closet Sob Medida',
-    category: 'Dormitórios'
+    title: 'Área Gourmet Externa',
+    category: 'Lazer'
   },
   {
     id: 8,
     image: case8,
-    title: 'Cozinha Provençal',
-    category: 'Clássico'
+    title: 'Balcão Curvo',
+    category: 'Mobiliário Fino'
   },
   {
     id: 9,
     image: case9,
-    title: 'Adega Climatizada',
-    category: 'Adega'
+    title: 'Banheiro Contemporâneo',
+    category: 'Living'
   },
   {
     id: 10,
     image: case10,
-    title: 'Espaço Gourmet Ilha',
-    category: 'Mobiliário Integrado'
+    title: 'Painel Home Theater',
+    category: 'Lazer'
   }
 ];
 
