@@ -5,6 +5,10 @@ exports.criarOrcamento = async (req, res) => {
   try {
     const novoOrcamento = new Orcamento(req.body);
     await novoOrcamento.save();
+
+    console.log('Orçamento criado com sucesso!');
+    console.log(novoOrcamento);
+
     res.status(201).json({ message: 'Orçamento enviado com sucesso!', id: novoOrcamento._id, data: novoOrcamento });
   } catch (error) {
     res.status(400).json({ error: 'Erro ao salvar orçamento', detalhes: error.message });
@@ -38,8 +42,8 @@ exports.buscarOrcamentoPorId = async (req, res) => {
 exports.atualizarOrcamento = async (req, res) => {
   try {
     const orcamentoAtualizado = await Orcamento.findByIdAndUpdate(
-      req.params.id, 
-      req.body, 
+      req.params.id,
+      req.body,
       { new: true, runValidators: true }
     );
     if (!orcamentoAtualizado) {

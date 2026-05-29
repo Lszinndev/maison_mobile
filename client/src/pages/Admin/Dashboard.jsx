@@ -18,7 +18,7 @@ import {
 } from 'hugeicons-react';
 import ProposalModal from '../../components/ProposalModal';
 
-
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://maisonmobileapi.vercel.app';
 
 const MOCK_LEAD = {
   id: 'mock-1',
@@ -69,7 +69,7 @@ export default function Dashboard() {
 
     const fetchLeads = async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/orcamentos');
+        const res = await fetch(`${API_BASE_URL}/api/orcamentos`);
         if (res.ok) {
           const data = await res.json();
           const formattedLeads = data.map(item => ({
@@ -115,7 +115,7 @@ export default function Dashboard() {
       return;
     }
     try {
-      const res = await fetch(`http://localhost:3000/api/orcamentos/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/orcamentos/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
@@ -150,7 +150,7 @@ export default function Dashboard() {
     }
     try {
       const { id, name, email, telefone, status, budget } = editedLead;
-      const res = await fetch(`http://localhost:3000/api/orcamentos/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/orcamentos/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nome: name, email, telefone, status, budget })

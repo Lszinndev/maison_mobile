@@ -206,8 +206,10 @@ export default function BudgetModal({ isOpen, onClose }) {
 
     setIsBotTyping(true);
 
+    const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://maisonmobileapi.vercel.app';
+
     try {
-      const response = await fetch('http://localhost:3000/api/orcamentos', {
+      const response = await fetch(`${API_BASE_URL}/api/orcamentos`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
