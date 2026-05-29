@@ -43,6 +43,7 @@ const MOCK_LEAD = {
 export default function Dashboard() {
   const navigate = useNavigate();
   const [leads, setLeads] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLead, setSelectedLead] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -68,6 +69,7 @@ export default function Dashboard() {
     }
 
     const fetchLeads = async () => {
+      setIsLoading(true);
       try {
         const res = await fetch(`${API_BASE_URL}/api/orcamentos`);
         if (res.ok) {
@@ -97,6 +99,8 @@ export default function Dashboard() {
         console.error("Erro ao buscar leads, usando mock local", err);
         setLeads([MOCK_LEAD]);
         setSelectedLead(MOCK_LEAD);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -308,33 +312,50 @@ export default function Dashboard() {
         </header>
 
         <div className="flex-1 overflow-y-auto px-3 py-2 pb-20 md:pb-2 space-y-1 scrollbar-hide">
-          {currentLeads.map((lead) => (
-            <div
-              key={lead.id}
-              onClick={() => {
-                setSelectedLead(lead);
-                setIsEditing(false);
-                setIsMobileListVisible(false);
-              }}
-              className={`p-4 rounded-2xl cursor-pointer transition-all duration-300 relative ${selectedLead?.id === lead.id
-                ? 'bg-white ring-1 ring-black/5 z-10'
-                : 'hover:bg-black/5 text-neutral-600'
-                }`}
-            >
-              <div className="flex justify-between items-start mb-1">
-                <span className={`text-[15px] font-semibold tracking-tight ${selectedLead?.id === lead.id ? 'text-black' : ''}`}>{lead.name}</span>
-                <span className="text-[10px] text-zinc-600 font-bold uppercase">{lead.date}</span>
+          {isLoading ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="p-4 rounded-2xl bg-white/60 border border-neutral-100/50 animate-pulse space-y-3">
+                <div className="flex justify-between items-center">
+                  <div className="h-4 bg-neutral-200 rounded-md w-2/3" />
+                  <div className="h-3 bg-neutral-100 rounded-md w-1/6" />
+                </div>
+                <div className="flex justify-between items-center">
+                  <div className="h-3 bg-neutral-100 rounded-md w-1/2" />
+                  <div className="h-2 w-2 bg-neutral-200 rounded-full" />
+                </div>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-[12px] text-zinc-500 truncate max-w-[160px]">{lead.email}</span>
-                <div className={`w-1.5 h-1.5 rounded-full ${lead.status === 'Novo' ? 'bg-[#0A84FF] animate-pulse ring-4 ring-[#0A84FF]/20' :
-                  lead.status === 'Atendimento' ? 'bg-[#FF9F0A]' :
-                    lead.status === 'Pendente' ? 'bg-[#FF3B30]' :
-                      'bg-[#30D158]'
-                  }`} />
+            ))
+          ) : currentLeads.length === 0 ? (
+            <div className="text-center py-8 text-neutral-400 text-sm">Nenhum lead encontrado</div>
+          ) : (
+            currentLeads.map((lead) => (
+              <div
+                key={lead.id}
+                onClick={() => {
+                  setSelectedLead(lead);
+                  setIsEditing(false);
+                  setIsMobileListVisible(false);
+                }}
+                className={`p-4 rounded-2xl cursor-pointer transition-all duration-300 relative ${selectedLead?.id === lead.id
+                  ? 'bg-white ring-1 ring-black/5 z-10'
+                  : 'hover:bg-black/5 text-neutral-600'
+                  }`}
+              >
+                <div className="flex justify-between items-start mb-1">
+                  <span className={`text-[15px] font-semibold tracking-tight ${selectedLead?.id === lead.id ? 'text-black' : ''}`}>{lead.name}</span>
+                  <span className="text-[10px] text-zinc-600 font-bold uppercase">{lead.date}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[12px] text-zinc-500 truncate max-w-[160px]">{lead.email}</span>
+                  <div className={`w-1.5 h-1.5 rounded-full ${lead.status === 'Novo' ? 'bg-[#0A84FF] animate-pulse ring-4 ring-[#0A84FF]/20' :
+                    lead.status === 'Atendimento' ? 'bg-[#FF9F0A]' :
+                      lead.status === 'Pendente' ? 'bg-[#FF3B30]' :
+                        'bg-[#30D158]'
+                    }`} />
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
         {/* Pagination Controls */}
@@ -363,7 +384,51 @@ export default function Dashboard() {
 
       {/* 3. Right Pane - Detail View (Ultra Modern Pro) */}
       <main className={`flex-1 flex-col min-w-0 overflow-hidden transition-colors duration-500 bg-white ${isMobileListVisible ? 'hidden md:flex' : 'flex'}`}>
-        {selectedLead ? (
+        {isLoading ? (
+          <div className="flex flex-col h-full animate-pulse">
+            {/* Header */}
+            <header className="p-6 md:p-10 pb-8 md:pb-12 border-b transition-colors duration-500 bg-[#F5F5F7]/30 border-neutral-100 backdrop-blur-xl">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-4">
+                <div className="space-y-3 w-full md:w-auto">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 bg-neutral-200 rounded-xl w-48 sm:w-64" />
+                    <div className="h-5 bg-neutral-200 rounded-full w-16" />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="h-4 bg-neutral-200 rounded-md w-32" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-300" />
+                    <div className="h-4 bg-neutral-200 rounded-md w-16" />
+                  </div>
+                </div>
+                <div className="hidden md:flex gap-3">
+                  <div className="h-10 bg-neutral-200 rounded-xl w-24" />
+                  <div className="h-10 bg-neutral-200 rounded-xl w-36" />
+                </div>
+              </div>
+            </header>
+
+            {/* Body */}
+            <div className="flex-1 overflow-y-auto p-6 pb-24 md:p-12 lg:p-16 space-y-8 md:space-y-16 scrollbar-hide">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="bg-neutral-50/70 border border-neutral-200/60 p-5 rounded-2xl min-h-[105px] flex flex-col justify-between">
+                    <div className="h-3 bg-neutral-200 rounded-md w-1/2" />
+                    <div className="h-4 bg-neutral-200 rounded-md w-3/4" />
+                  </div>
+                ))}
+              </div>
+
+              <section className="space-y-6">
+                <div className="h-4 bg-neutral-200 rounded-md w-32" />
+                <div className="bg-neutral-50/70 border border-neutral-200/60 p-6 md:p-8 rounded-3xl min-h-[120px] space-y-3">
+                  <div className="h-4 bg-neutral-200 rounded-md w-full" />
+                  <div className="h-4 bg-neutral-200 rounded-md w-5/6" />
+                  <div className="h-4 bg-neutral-200 rounded-md w-2/3" />
+                </div>
+              </section>
+            </div>
+          </div>
+        ) : selectedLead ? (
           <div className="flex flex-col h-full animate-fade-in">
             {/* Header */}
             <header className="p-6 md:p-10 pb-8 md:pb-12 border-b transition-colors duration-500 bg-[#F5F5F7]/30 border-neutral-100 backdrop-blur-xl">
