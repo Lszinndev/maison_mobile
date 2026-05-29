@@ -18,7 +18,7 @@ import {
 } from 'hugeicons-react';
 import ProposalModal from '../../components/ProposalModal';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://maisonmobile.vercel.app';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://maisonmobileapi.vercel.app';
 
 const MOCK_LEAD = {
   id: 'mock-1',
