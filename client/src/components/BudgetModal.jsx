@@ -444,7 +444,7 @@ export default function BudgetModal({ isOpen, onClose }) {
                     {['Blum', 'Hafele', 'FGV', 'Hettich'].map(brand => (
                       <button
                         key={brand} type="button" onClick={() => setFormData({ ...formData, marcaFerragem: brand })}
-                        className={`py-4 rounded-xl border text-center transition-all ${formData.marcaFerragem === brand ? 'bg-[#F7D634] text-black border-[#F7D634] font-bold' : 'bg-neutral-50 border-transparent text-neutral-400 hover:border-neutral-200 cursor-pointer'
+                        className={`py-4 rounded-xl border text-center transition-all ${formData.marcaFerragem === brand ? 'bg-[#F7D634] text-black border-[#F7D634] font-bold' : 'bg-neutral-50 border-transparent text-neutral-500 hover:border-neutral-300 cursor-pointer'
                           }`}
                       >
                         <span className="text-[12px]">{brand}</span>
@@ -514,18 +514,17 @@ export default function BudgetModal({ isOpen, onClose }) {
                     <label className="text-[10px] font-bold text-neutral-800 uppercase tracking-[0.2em] ml-1">Seu E-mail</label>
                     <div className="relative">
                       <Mail01Icon size={18} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${formData.email && !validateEmail(formData.email) ? 'text-red-500' : 'text-neutral-400'}`} />
-                      <input 
-                        type="email" 
-                        name="email" 
-                        value={formData.email} 
-                        onChange={handleInputChange} 
-                        required 
-                        className={`w-full pl-12 pr-4 py-4 bg-neutral-50 rounded-2xl outline-none transition-all font-medium text-black placeholder:text-neutral-400 border-2 ${
-                          formData.email && !validateEmail(formData.email)
-                            ? 'border-red-500/50 focus:ring-2 focus:ring-red-500/20'
-                            : 'border-transparent focus:ring-2 focus:ring-[#F7D634]/50'
-                        }`} 
-                        placeholder="exemplo@email.com" 
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        required
+                        className={`w-full pl-12 pr-4 py-4 bg-neutral-50 rounded-2xl outline-none transition-all font-medium text-black placeholder:text-neutral-400 border-2 ${formData.email && !validateEmail(formData.email)
+                          ? 'border-red-500/50 focus:ring-2 focus:ring-red-500/20'
+                          : 'border-transparent focus:ring-2 focus:ring-[#F7D634]/50'
+                          }`}
+                        placeholder="exemplo@email.com"
                       />
                     </div>
                     {formData.email && !validateEmail(formData.email) && (
